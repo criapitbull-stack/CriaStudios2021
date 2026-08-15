@@ -227,9 +227,9 @@ export default function ChatWidget({ open, onClose }: ChatWidgetProps) {
                 <div className="text-center py-8">
                   <div className="inline-block bg-white/90 rounded-2xl px-4 py-3 shadow-sm max-w-[85%]">
                     <p className="text-sm text-ink-700">
-                      Olá! Bem-vinda à Cria Studios. Para começar seu cadastro
-                      como modelo, envie uma mensagem ou preencha o formulário
-                      de cadastro. Tire suas dúvidas — estamos aqui para ajudar!
+                      Olá! Se cadastre no site ou mande mensagem no WhatsApp 71993559126.
+                      Para começar seu cadastro como modelo, envie uma mensagem ou preencha o formulário de cadastro.
+                      Tire suas dúvidas — estamos aqui para ajudar!
                     </p>
                   </div>
                 </div>

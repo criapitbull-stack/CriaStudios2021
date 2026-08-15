@@ -90,6 +90,21 @@ export default function Hero({ onOpenChat }: HeroProps) {
             </div>
 
             <div
+              className="animate-fade-in-up"
+              style={{ animationDelay: '0.35s' }}
+            >
+              <a
+                href="https://wa.me/5571993559126?text=Ol%C3%A1%20vim%20do%20site%20quero%20ser%20modelo"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-green-500 text-white font-semibold text-sm hover:bg-green-600 transition-all shadow-lg hover:scale-105"
+              >
+                <MessageCircle className="w-4 h-4" />
+                OU CLIQUE AQUI PARA IR PRO WHATSAPP
+              </a>
+            </div>
+
+            <div
               className="flex flex-wrap gap-6 animate-fade-in-up"
               style={{ animationDelay: '0.4s' }}
             >
