@@ -32,7 +32,16 @@ export default function ChatWidget({ open, onClose }: ChatWidgetProps) {
 
   const playNotificationSound = () => {
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
+      
+      const audioContext = new AudioContext();
+      
+      // Resumir o contexto se estiver suspenso (necessário em alguns navegadores)
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
 
@@ -49,6 +58,11 @@ export default function ChatWidget({ open, onClose }: ChatWidgetProps) {
 
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.3);
+      
+      // Limpar recursos após o som
+      setTimeout(() => {
+        audioContext.close();
+      }, 400);
     } catch (error) {
       console.error('Erro ao tocar som de notificação:', error);
     }
