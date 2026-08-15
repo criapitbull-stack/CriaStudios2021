@@ -17,7 +17,7 @@ export const SLIDES = [
   {
     image: 'https://images.pexels.com/photos/32286032/pexels-photo-32286032.jpeg?auto=compress&cs=tinysrgb&w=1600',
     title: 'Renda extra que vira renda principal',
-    subtitle: 'Modelos dedicados faturam de R$ 5.000 a R$ 30.000 por mês',
+    subtitle: 'Modelos dedicados conseguem renda expressiva com transmissões regulares',
   },
 ];
 
@@ -35,19 +35,19 @@ export const ROTATING_CTAS = [
 export const EARNINGS_TIERS = [
   {
     level: 'Iniciante',
-    range: 'R$ 5.000 – R$ 10.000',
+    range: 'Faixa inicial',
     description: 'Primeiros 3 meses, aprendendo as plataformas e construindo sua audiência.',
     color: 'from-rose-400 to-rose-500',
   },
   {
     level: 'Intermediário',
-    range: 'R$ 10.000 – R$ 20.000',
-    description: 'Com audiência fiel e horários regulares, seus ganhos disparam.',
+    range: 'Faixa intermediária',
+    description: 'Com audiência fiel e horários regulares, seus ganhos aumentam.',
     color: 'from-gold-400 to-gold-500',
   },
   {
     level: 'Experiente',
-    range: 'R$ 20.000 – R$ 30.000+',
+    range: 'Faixa avançada',
     description: 'Modelos dedicados com transmissões diárias e fãs recorrentes.',
     color: 'from-ink-700 to-ink-900',
   },
@@ -57,22 +57,22 @@ export const TESTIMONIALS = [
   {
     name: 'Mariana, 24 anos',
     location: 'São Paulo, SP',
-    text: 'Comecei sem saber nada. Em dois meses já estava faturando R$ 8.000. A Cria Studios me cadastrou em 3 plataformas e me deu todo o suporte. Hoje trabalho 4 horas por dia e tenho liberdade total.',
-    earnings: 'R$ 12.000/mês',
+    text: 'Comecei sem saber nada. Em dois meses já estava conseguindo renda expressiva. A Cria Studios me cadastrou em 3 plataformas e me deu todo o suporte. Hoje trabalho 4 horas por dia e tenho liberdade total.',
+    earnings: 'Renda expressiva',
     image: 'https://images.pexels.com/photos/6635614/pexels-photo-6635614.jpeg?auto=compress&cs=tinysrgb&w=400',
   },
   {
     name: 'Beatriz, 29 anos',
     location: 'Salvador, BA',
     text: 'Era professora e mal pagava as contas. Hoje faço em uma semana o que fazia em um mês. O melhor é que trabalho de casa, no meu horário, sem patrão.',
-    earnings: 'R$ 18.000/mês',
+    earnings: 'Renda significativa',
     image: 'https://images.pexels.com/photos/11961872/pexels-photo-11961872.jpeg?auto=compress&cs=tinysrgb&w=400',
   },
   {
     name: 'Juliana, 22 anos',
     location: 'Rio de Janeiro, RJ',
-    text: 'O cadastro foi super simples pelo chat. Em poucos dias já estava transmitindo no Stripchat e Cam4. A equipe da Cria me orientou em cada passo. Recomendo demais!',
-    earnings: 'R$ 7.500/mês',
+    text: 'O cadastro foi super simples pelo chat. Em poucos dias já estava transmitindo nas plataformas. A equipe da Cria me orientou em cada passo. Recomendo demais!',
+    earnings: 'Bons resultados',
     image: 'https://images.pexels.com/photos/6828383/pexels-photo-6828383.jpeg?auto=compress&cs=tinysrgb&w=400',
   },
 ];
@@ -80,7 +80,7 @@ export const TESTIMONIALS = [
 export const FAQS = [
   {
     q: 'Como ganhar dinheiro em casa como camgirl?',
-    a: 'Através do cadastro em plataformas de webcam como Stripchat, Cam4, CameraPrive, Chaturbate e SkyPrivate, você transmite ao vivo de casa e ganha em moedas, gorjetas e transmissões privadas. Modelos experientes ganham de R$ 5.000 a R$ 30.000 por mês.',
+    a: 'Através do cadastro em plataformas de webcam, você transmite ao vivo de casa e ganha em moedas, gorjetas e transmissões privadas. Modelos experientes conseguem renda expressiva com transmissões regulares.',
   },
   {
     q: 'Preciso de experiência para ser modelo de webcam?',
@@ -88,7 +88,7 @@ export const FAQS = [
   },
   {
     q: 'Quanto um modelo de webcam ganha por mês?',
-    a: 'Os ganhos variam conforme o tempo e dedicação. Iniciantes costumam ganhar de R$ 5.000 a R$ 10.000, enquanto modelos experientes e dedicados podem ultrapassar R$ 30.000 por mês.',
+    a: 'Os ganhos variam conforme o tempo e dedicação. Iniciantes costumam começar com valores menores, enquanto modelos experientes e dedicados podem alcançar renda significativa com transmissões regulares.',
   },
   {
     q: 'É preciso ter 18 anos?',
@@ -96,7 +96,7 @@ export const FAQS = [
   },
   {
     q: 'Quais plataformas a Cria Studios cadastra?',
-    a: 'Stripchat, Cam4, CameraPrive, Chaturbate e SkyPrivate, entre outras. Você acompanha o cadastro pelo chat com nosso admin e recebe a liberação conforme cada plataforma é ativada.',
+    a: 'Trabalhamos com as principais plataformas de webcam do mercado. Você acompanha o cadastro pelo chat com nosso admin e recebe a liberação conforme cada plataforma é ativada.',
   },
   {
     q: 'Preciso pagar pelo cadastro?',
@@ -116,8 +116,8 @@ export const SEO_CONTENT = [
   {
     heading: 'Renda extra em casa: a oportunidade de trabalhar como camgirl',
     paragraphs: [
-      'A busca por renda extra em casa cresceu exponencialmente nos últimos anos. Com o avanço da internet e das plataformas de transmissão ao vivo, milhares de mulheres descobriram que é possível ganhar dinheiro sem sair de casa, com horários flexíveis e sem patrão. O trabalho como camgirl — modelo de webcam adulta — se tornou uma das formas mais lucrativas de renda extra online, permitindo ganhos que variam de R$ 5.000 a mais de R$ 30.000 por mês, dependendo da dedicação e estratégia.',
-      'A Cria Studios, estúdio de modelos adultas fundado em 2021, com atuação internacional, é especializada em cadastrar e orientar mulheres que querem começar nessa carreira. Nosso papel é simples: conversamos com você pelo chat, entendemos seu perfil, cadastramos você nas principais plataformas de webcam do mundo — Stripchat, Cam4, CameraPrive, Chaturbate e SkyPrivate — e damos todo o suporte para que você maximize seus ganhos.',
+      'A busca por renda extra em casa cresceu exponencialmente nos últimos anos. Com o avanço da internet e das plataformas de transmissão ao vivo, milhares de mulheres descobriram que é possível ganhar dinheiro sem sair de casa, com horários flexíveis e sem patrão. O trabalho como camgirl — modelo de webcam adulta — se tornou uma das formas mais lucrativas de renda extra online, permitindo ganhos significativos dependendo da dedicação e estratégia.',
+      'A Cria Studios, estúdio de modelos adultas fundado em 2021, com atuação internacional, é especializada em cadastrar e orientar mulheres que querem começar nessa carreira. Nosso papel é simples: conversamos com você pelo chat, entendemos seu perfil, cadastramos você nas principais plataformas de webcam do mundo e damos todo o suporte para que você maximize seus ganhos.',
       'Não é necessário experiência prévia. Não é necessário investimento inicial. Não é necessário equipamento profissional. Tudo o que você precisa é ter 18 anos ou mais, um celular ou notebook com câmera de boa qualidade, e tempo livre para dedicar às transmissões. A Cria Studios cuida do resto.',
     ],
   },
@@ -133,16 +133,16 @@ export const SEO_CONTENT = [
     heading: 'Como ser camgirl: passo a passo do cadastro ao primeiro pagamento',
     paragraphs: [
       'O processo para se tornar camgirl com a Cria Studios é simples e transparente. Primeiro, você entra em contato pelo chat no nosso site — não precisa se cadastrar em nada, basta conversar com nosso admin. Nós coletamos apenas três informações: seu nome, sua idade e seu número de WhatsApp. A idade mínima é 18 anos, sem exceções.',
-      'Em seguida, verificamos os requisitos: celular ou notebook com câmera de boa qualidade e tempo livre para transmitir. Se tudo estiver certo, iniciamos seu cadastro nas plataformas de modelo adulta. Cada plataforma — Stripchat, Cam4, CameraPrive, Chaturbate, SkyPrivate — tem seu próprio processo, e nós acompanhamos cada uma.',
+      'Em seguida, verificamos os requisitos: celular ou notebook com câmera de boa qualidade e tempo livre para transmitir. Se tudo estiver certo, iniciamos seu cadastro nas plataformas de modelo adulta. Cada plataforma tem seu próprio processo, e nós acompanhamos cada uma.',
       'Você acompanha todo o andamento pelo chat, com seu número de protocolo. Quando o cadastro em uma plataforma é concluído, liberamos o ícone e o nome dela no seu painel, e você já pode iniciar as transmissões. O primeiro pagamento costuma chegar em poucas semanas, dependendo da plataforma e do volume de transmissões.',
     ],
   },
   {
-    heading: 'Stripchat, Cam4, CameraPrive, Chaturbate e SkyPrivate: as melhores plataformas',
+    heading: 'As melhores plataformas de webcam',
     paragraphs: [
-      'A Cria Studios trabalha com as plataformas mais lucrativas e confiáveis do mercado de webcam adulta. O Stripchat é uma das maiores do mundo, com milhões de visitantes diários e sistema de gorjetas em moedas. O Cam4 é tradicional e tem base fiel de usuários. O CameraPrive é forte no Brasil, com pagamentos em reais. O Chaturbate é referência global em transmissões ao vivo. O SkyPrivate permite transmissões privadas pagas por minuto.',
-      'Cada plataforma tem suas particularidades de público, formato de pagamento e regras. Por isso, cadastramos você em várias delas — assim você diversifica suas fontes de renda e descobre qual funciona melhor para o seu perfil. Não há custo para se cadastrar em nenhuma delas, e a Cria Studios não cobra taxa pelo cadastro.',
-      'O segredo dos ganhos altos está na combinação de plataformas, consistência nas transmissões, e construção de uma audiência fiel. Modelos que transmitem diariamente em pelo menos duas plataformas tendem a faturar significativamente mais do que os que usam apenas uma.',
+      'A Cria Studios trabalha com as plataformas mais lucrativas e confiáveis do mercado de webcam adulta. Cada plataforma tem suas particularidades de público, formato de pagamento e regras.',
+      'Por isso, cadastramos você em várias delas — assim você diversifica suas fontes de renda e descobre qual funciona melhor para o seu perfil. Não há custo para se cadastrar em nenhuma delas, e a Cria Studios não cobra taxa pelo cadastro.',
+      'O segredo dos ganhos expressivos está na combinação de plataformas, consistência nas transmissões, e construção de uma audiência fiel. Modelos que transmitem diariamente em pelo menos duas plataformas tendem a ter resultados significativamente melhores.',
     ],
   },
   {

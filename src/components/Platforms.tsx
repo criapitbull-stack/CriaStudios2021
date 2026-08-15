@@ -10,11 +10,11 @@ export default function Platforms() {
             Onde você vai transmitir
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-ink-900 mt-2 mb-4 text-balance">
-            As melhores plataformas de webcam
+            Plataformas de webcam
           </h2>
           <p className="text-ink-500 text-lg max-w-2xl mx-auto">
-            Cadastramos você nas plataformas mais lucrativas do mercado. Quando
-            o cadastro é concluído, liberamos o ícone dela no seu painel.
+            Trabalhamos com as principais plataformas do mercado. Quando
+            o cadastro é concluído, liberamos o acesso no seu painel.
           </p>
         </div>
 

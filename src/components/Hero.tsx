@@ -99,7 +99,7 @@ export default function Hero({ onOpenChat }: HeroProps) {
               </div>
               <div className="flex items-center gap-2 text-ink-200">
                 <TrendingUp className="w-5 h-5 text-gold-400" />
-                <span className="text-sm">Até R$ 30.000/mês</span>
+                <span className="text-sm">Renda expressiva</span>
               </div>
               <div className="flex items-center gap-2 text-ink-200">
                 <MessageCircle className="w-5 h-5 text-gold-400" />

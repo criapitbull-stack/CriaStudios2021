@@ -1,0 +1,5 @@
+# Redirecionar /admin para o hash route correto
+/admin /#admin 302
+
+# SPA fallback - redirecionar todas as rotas não encontradas para index.html
+/* /index.html 200

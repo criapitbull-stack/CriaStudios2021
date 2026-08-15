@@ -18,8 +18,7 @@ de transmissão para ela.
      validada no banco).
    - `status`: novo / em_atendimento / cadastro_concluido.
 2. `messages` - mensagens trocadas no chat (uma por visitante ou admin).
-3. `conversation_platforms` - quais plataformas (Stripchat, Cam4,
-   CameraPrive, Chaturbate, SkyPrivate) o admin já liberou para cada
+3. `conversation_platforms` - quais plataformas o admin já liberou para cada
    candidata.
 
 ## Segurança
@@ -72,7 +71,7 @@ CREATE INDEX IF NOT EXISTS messages_conversation_id_idx ON messages(conversation
 CREATE TABLE IF NOT EXISTS conversation_platforms (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   conversation_id uuid NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
-  platform text NOT NULL CHECK (platform IN ('stripchat', 'cam4', 'cameraprive', 'chaturbate', 'skyprivate')),
+  platform text NOT NULL CHECK (platform IN ('platform1', 'platform2', 'platform3', 'platform4', 'platform5')),
   enabled_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (conversation_id, platform)
 );

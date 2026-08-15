@@ -1,6 +1,6 @@
 export type ConversationStatus = 'novo' | 'em_atendimento' | 'cadastro_concluido';
 
-export type PlatformKey = 'stripchat' | 'cam4' | 'cameraprive' | 'chaturbate' | 'skyprivate';
+export type PlatformKey = 'platform1' | 'platform2' | 'platform3' | 'platform4' | 'platform5';
 
 export interface ChatMessage {
   id: string;

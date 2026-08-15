@@ -9,11 +9,11 @@ export interface PlatformInfo {
 }
 
 export const PLATFORMS: PlatformInfo[] = [
-  { key: 'stripchat', name: 'Stripchat', color: '#f59e0b', icon: Radio },
-  { key: 'cam4', name: 'Cam4', color: '#ef4444', icon: Video },
-  { key: 'cameraprive', name: 'CameraPrive', color: '#e11d48', icon: Camera },
-  { key: 'chaturbate', name: 'Chaturbate', color: '#f97316', icon: Sparkles },
-  { key: 'skyprivate', name: 'SkyPrivate', color: '#0ea5e9', icon: Star },
+  { key: 'platform1', name: 'Plataforma 1', color: '#f59e0b', icon: Radio },
+  { key: 'platform2', name: 'Plataforma 2', color: '#ef4444', icon: Video },
+  { key: 'platform3', name: 'Plataforma 3', color: '#e11d48', icon: Camera },
+  { key: 'platform4', name: 'Plataforma 4', color: '#f97316', icon: Sparkles },
+  { key: 'platform5', name: 'Plataforma 5', color: '#0ea5e9', icon: Star },
 ];
 
 export function getPlatform(key: PlatformKey): PlatformInfo {

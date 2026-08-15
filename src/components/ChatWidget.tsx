@@ -26,15 +26,52 @@ export default function ChatWidget({ open, onClose }: ChatWidgetProps) {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const messageCountRef = useRef<number>(0);
 
   const token = getVisitorToken();
+
+  const playNotificationSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // Configurar som similar ao WhatsApp/iPhone (duas notas em sequência)
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+      oscillator.frequency.setValueAtTime(1174.66, audioContext.currentTime + 0.1); // D6
+
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (error) {
+      console.error('Erro ao tocar som de notificação:', error);
+    }
+  };
 
   const loadConversation = async () => {
     const { data, error } = await supabase.rpc('get_my_conversation', {
       p_visitor_token: token,
     });
     if (!error && data) {
-      setConversation(data as ConversationState);
+      const newConversation = data as ConversationState;
+      const newMessageCount = newConversation.messages?.length || 0;
+      
+      // Tocar som se recebeu nova mensagem do admin
+      if (newMessageCount > messageCountRef.current && newMessageCount > 0) {
+        const lastMessage = newConversation.messages[newMessageCount - 1];
+        if (lastMessage?.sender === 'admin') {
+          playNotificationSound();
+        }
+      }
+      
+      messageCountRef.current = newMessageCount;
+      setConversation(newConversation);
     }
   };
 
@@ -88,7 +125,9 @@ export default function ChatWidget({ open, onClose }: ChatWidgetProps) {
       setError('Não foi possível enviar. Tente novamente.');
       return;
     }
-    setConversation(data as ConversationState);
+    const newConversation = data as ConversationState;
+    messageCountRef.current = newConversation.messages?.length || 0;
+    setConversation(newConversation);
   };
 
   const submitRegistration = async () => {

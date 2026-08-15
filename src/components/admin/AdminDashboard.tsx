@@ -21,6 +21,31 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const messageCountRef = useRef<number>(0);
+
+  const playNotificationSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // Configurar som similar ao WhatsApp/iPhone (duas notas em sequência)
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+      oscillator.frequency.setValueAtTime(1174.66, audioContext.currentTime + 0.1); // D6
+
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (error) {
+      console.error('Erro ao tocar som de notificação:', error);
+    }
+  };
 
   const loadConversations = async () => {
     let query = supabase
@@ -46,6 +71,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   }, [filter]);
 
   useEffect(() => {
+    messageCountRef.current = 0; // Resetar contador quando mudar de conversa
     if (!selectedId) return;
 
     const loadDetail = async () => {
@@ -61,7 +87,21 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           .eq('conversation_id', selectedId),
       ]);
 
-      if (msgRes.data) setMessages(msgRes.data as ChatMessage[]);
+      if (msgRes.data) {
+        const newMessages = msgRes.data as ChatMessage[];
+        const newMessageCount = newMessages.length;
+        
+        // Tocar som se recebeu nova mensagem do visitante
+        if (newMessageCount > messageCountRef.current && newMessageCount > 0) {
+          const lastMessage = newMessages[newMessageCount - 1];
+          if (lastMessage?.sender === 'visitor') {
+            playNotificationSound();
+          }
+        }
+        
+        messageCountRef.current = newMessageCount;
+        setMessages(newMessages);
+      }
       if (platRes.data) {
         setPlatforms(platRes.data.map((r: { platform: PlatformKey }) => r.platform));
       }
