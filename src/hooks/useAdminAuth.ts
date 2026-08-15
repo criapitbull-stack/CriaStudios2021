@@ -10,6 +10,9 @@ export function useAdminAuth() {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);
+    }).catch(() => {
+      setSession(null);
+      setLoading(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
