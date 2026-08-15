@@ -226,11 +226,20 @@ export default function ChatWidget({ open, onClose }: ChatWidgetProps) {
               {messages.length === 0 && (
                 <div className="text-center py-8">
                   <div className="inline-block bg-white/90 rounded-2xl px-4 py-3 shadow-sm max-w-[85%]">
-                    <p className="text-sm text-ink-700">
+                    <p className="text-sm text-ink-700 mb-3">
                       Olá! Se cadastre no site ou mande mensagem no WhatsApp 71993559126.
                       Para começar seu cadastro como modelo, envie uma mensagem ou preencha o formulário de cadastro.
                       Tire suas dúvidas — estamos aqui para ajudar!
                     </p>
+                    <a
+                      href="https://wa.me/5571993559126?text=Ol%C3%A1%20vim%20do%20site%20quero%20ser%20modelo"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500 text-white text-xs font-semibold hover:bg-green-600 transition-all shadow-md hover:scale-105"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      OU CLIQUE AQUI PARA IR PRO WHATSAPP
+                    </a>
                   </div>
                 </div>
               )}
