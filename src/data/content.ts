@@ -35,19 +35,19 @@ export const ROTATING_CTAS = [
 export const EARNINGS_TIERS = [
   {
     level: 'Iniciante',
-    range: 'Faixa inicial',
+    range: 'R$100 por dia até R$3.000 por mês',
     description: 'Primeiros 3 meses, aprendendo as plataformas e construindo sua audiência.',
     color: 'from-rose-400 to-rose-500',
   },
   {
     level: 'Intermediário',
-    range: 'Faixa intermediária',
+    range: 'R$300 por dia até R$5.000 por mês',
     description: 'Com audiência fiel e horários regulares, seus ganhos aumentam.',
     color: 'from-gold-400 to-gold-500',
   },
   {
     level: 'Experiente',
-    range: 'Faixa avançada',
+    range: 'R$1.000 por dia até R$30.000 por mês',
     description: 'Modelos dedicados com transmissões diárias e fãs recorrentes.',
     color: 'from-ink-700 to-ink-900',
   },
