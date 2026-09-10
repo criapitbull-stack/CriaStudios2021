@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, MessageCircle, Shield, TrendingUp } from 'lucide-react';
 import { SLIDES, ROTATING_CTAS } from '@/data/content';
+import { redirectToWhatsApp } from '@/lib/whatsapp';
 
 interface HeroProps {
-  onOpenChat: () => void;
+  onOpenChat?: () => void;
 }
 
 export default function Hero({ onOpenChat }: HeroProps) {
@@ -73,7 +74,7 @@ export default function Hero({ onOpenChat }: HeroProps) {
               style={{ animationDelay: '0.3s' }}
             >
               <button
-                onClick={onOpenChat}
+                onClick={() => redirectToWhatsApp()}
                 className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold text-base hover:from-rose-600 hover:to-rose-700 transition-all shadow-glow hover:scale-105 min-w-[260px]"
               >
                 <MessageCircle className="w-5 h-5" />

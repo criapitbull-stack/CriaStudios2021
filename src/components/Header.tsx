@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Menu, X, MessageCircle } from 'lucide-react';
 import RotatingCta from '@/components/RotatingCta';
+import { redirectToWhatsApp } from '@/lib/whatsapp';
 
 interface HeaderProps {
-  onOpenChat: () => void;
+  onOpenChat?: () => void;
 }
 
 export default function Header({ onOpenChat }: HeaderProps) {
@@ -58,7 +59,7 @@ export default function Header({ onOpenChat }: HeaderProps) {
             <RotatingCta
               icon={MessageCircle}
               iconClass="w-4 h-4"
-              onClick={onOpenChat}
+              onClick={() => redirectToWhatsApp()}
               className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-rose-500 to-rose-600 text-white text-sm font-semibold hover:from-rose-600 hover:to-rose-700 transition-all shadow-glow"
             />
             <button
@@ -88,7 +89,7 @@ export default function Header({ onOpenChat }: HeaderProps) {
               iconClass="w-4 h-4"
               onClick={() => {
                 setMenuOpen(false);
-                onOpenChat();
+                redirectToWhatsApp();
               }}
               className="sm:hidden mt-2 flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-rose-500 to-rose-600 text-white text-sm font-semibold"
             />

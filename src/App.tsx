@@ -11,13 +11,11 @@ import FAQ from '@/components/FAQ';
 import SeoContent from '@/components/SeoContent';
 import Footer from '@/components/Footer';
 import ChatButton from '@/components/ChatButton';
-import ChatWidget from '@/components/ChatWidget';
 import AdminLogin from '@/components/admin/AdminLogin';
 import AdminDashboard from '@/components/admin/AdminDashboard';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 function App() {
-  const [chatOpen, setChatOpen] = useState(false);
   const [route, setRoute] = useState(window.location.hash);
   const { session, loading, isAdmin } = useAdminAuth();
 
@@ -56,21 +54,20 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header onOpenChat={() => setChatOpen(true)} />
+      <Header />
       <main>
-        <Hero onOpenChat={() => setChatOpen(true)} />
+        <Hero />
         <About />
-        <HowItWorks onOpenChat={() => setChatOpen(true)} />
-        <Earnings onOpenChat={() => setChatOpen(true)} />
-        <Requirements onOpenChat={() => setChatOpen(true)} />
+        <HowItWorks />
+        <Earnings />
+        <Requirements />
         <Platforms />
         <Testimonials />
-        <FAQ onOpenChat={() => setChatOpen(true)} />
+        <FAQ />
         <SeoContent />
       </main>
-      <Footer onOpenChat={() => setChatOpen(true)} />
-      <ChatButton onOpenChat={() => setChatOpen(true)} />
-      <ChatWidget open={chatOpen} onClose={() => setChatOpen(false)} />
+      <Footer />
+      <ChatButton />
     </div>
   );
 }

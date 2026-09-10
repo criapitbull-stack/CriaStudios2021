@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { FAQS } from '@/data/content';
 import RotatingCta from '@/components/RotatingCta';
+import { redirectToWhatsApp } from '@/lib/whatsapp';
 
 interface FAQProps {
-  onOpenChat: () => void;
+  onOpenChat?: () => void;
 }
 
 export default function FAQ({ onOpenChat }: FAQProps) {
@@ -51,7 +52,7 @@ export default function FAQ({ onOpenChat }: FAQProps) {
         <div className="text-center mt-10">
           <p className="text-ink-500 mb-4">Ainda tem dúvidas? Fale com a gente.</p>
           <RotatingCta
-            onClick={onOpenChat}
+            onClick={() => redirectToWhatsApp()}
             className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold hover:from-rose-600 hover:to-rose-700 transition-all shadow-glow"
           />
         </div>

@@ -1,9 +1,10 @@
 import { TrendingUp, DollarSign, Clock } from 'lucide-react';
 import { EARNINGS_TIERS } from '@/data/content';
 import RotatingCta from '@/components/RotatingCta';
+import { redirectToWhatsApp } from '@/lib/whatsapp';
 
 interface EarningsProps {
-  onOpenChat: () => void;
+  onOpenChat?: () => void;
 }
 
 export default function Earnings({ onOpenChat }: EarningsProps) {
@@ -92,7 +93,7 @@ export default function Earnings({ onOpenChat }: EarningsProps) {
 
         <div className="text-center mt-12">
           <RotatingCta
-            onClick={onOpenChat}
+            onClick={() => redirectToWhatsApp()}
             className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold hover:from-rose-600 hover:to-rose-700 transition-all shadow-glow hover:scale-105"
           />
         </div>

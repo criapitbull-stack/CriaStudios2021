@@ -1,7 +1,8 @@
 import { Shield, Lock, MapPin } from 'lucide-react';
+import { redirectToWhatsApp } from '@/lib/whatsapp';
 
 interface FooterProps {
-  onOpenChat: () => void;
+  onOpenChat?: () => void;
 }
 
 export default function Footer({ onOpenChat }: FooterProps) {
@@ -63,7 +64,7 @@ export default function Footer({ onOpenChat }: FooterProps) {
           <div>
             <h4 className="font-semibold text-white mb-4">Contato</h4>
             <button
-              onClick={onOpenChat}
+              onClick={() => redirectToWhatsApp()}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold text-sm hover:from-rose-600 hover:to-rose-700 transition-all"
             >
               Abrir chat
