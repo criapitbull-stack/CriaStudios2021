@@ -6,14 +6,22 @@ interface ContractData {
   cpf: string;
   telefone: string;
   email: string;
+  nomePlataforma: string;
+  nomeArtistico: string;
 }
 
-export default function ContractPage() {
+interface ContractPageProps {
+  contractId?: string | null;
+}
+
+export default function ContractPage({ contractId }: ContractPageProps) {
   const [contractData, setContractData] = useState<ContractData>({
     nome: '',
     cpf: '',
     telefone: '',
     email: '',
+    nomePlataforma: '',
+    nomeArtistico: '',
   });
   
   const [pdfUrl] = useState<string>('/Contrato_REISM_King_Cinema_Profissional_v2.pdf');
@@ -25,9 +33,9 @@ export default function ContractPage() {
   const [showSignature2, setShowSignature2] = useState(false);
 
   const generateContractUrl = () => {
-    const contractId = Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+    const id = contractId || Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
     const baseUrl = window.location.origin;
-    return `${baseUrl}/contrato/${contractId}`;
+    return `${baseUrl}/#CONTRATO${id}`;
   };
 
   const handleDownload = () => {
@@ -44,15 +52,88 @@ export default function ContractPage() {
     setError('');
 
     try {
-      // Download do PDF original - abre em nova aba para funcionar em mobile
-      window.open(pdfUrl, '_blank');
+      // Criar documento HTML com todos os dados preenchidos
+      const today = new Date().toLocaleDateString('pt-BR');
+      const contractContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Contrato - ${contractData.nome}</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 30px; }
+    .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; }
+    .signature-box { margin-top: 30px; padding: 20px; border: 2px solid #000; }
+    .signature { font-family: cursive; font-size: 18px; margin: 10px 0; }
+    .label { font-weight: bold; }
+    .data { margin: 5px 0; }
+    .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE AGENCIAMENTO DE MODELO DIGITAL</h1>
+  </div>
+
+  <div class="section">
+    <h2>CONTRATANTE / AGÊNCIA</h2>
+    <div class="data"><span class="label">REIS PRODUÇÕES CINEMATOGRÁFICAS</span></div>
+    <div class="data"><span class="label">CNPJ:</span> 69.209.066/0001-92</div>
+    <div class="data"><span class="label">Website:</span> www.querofazerlive.com</div>
+  </div>
+
+  <div class="section">
+    <h2>MODELO</h2>
+    <div class="data"><span class="label">Nome:</span> ${contractData.nome}</div>
+    <div class="data"><span class="label">CPF:</span> ${contractData.cpf}</div>
+    <div class="data"><span class="label">Telefone:</span> ${contractData.telefone}</div>
+    <div class="data"><span class="label">E-mail:</span> ${contractData.email}</div>
+    <div class="data"><span class="label">Nome nas Plataformas:</span> ${contractData.nomePlataforma || 'Não informado'}</div>
+    <div class="data"><span class="label">Nome Artístico:</span> ${contractData.nomeArtistico || 'Não informado'}</div>
+  </div>
+
+  <div class="section">
+    <h2>CONTRATO DE PRESTAÇÃO DE SERVIÇOS</h2>
+    <p>O presente contrato tem por objeto a prestação de serviços de agenciamento, divulgação, orientação e suporte operacional à CONTRATADA, para realização de atividades digitais, incluindo transmissões ao vivo (lives), videochamadas e divulgação de perfil em plataformas destinadas ao público em geral.</p>
+  </div>
+
+  <div class="signature-box">
+    <h3>ASSINATURA - PÁGINA DE DADOS</h3>
+    <div class="data"><span class="label">Assinatura da Modelo:</span></div>
+    <div class="signature">${signature1Text}</div>
+    <div class="data"><span class="label">Data:</span> ${today}</div>
+  </div>
+
+  <div class="signature-box">
+    <h3>ASSINATURA - FINAL DO CONTRATO</h3>
+    <div class="data"><span class="label">Assinatura da Modelo:</span></div>
+    <div class="signature">${signature2Text}</div>
+    <div class="data"><span class="label">Data:</span> ${today}</div>
+  </div>
+
+  <div class="footer">
+    KING CINEMA PRODUCTIONS • REISM ESCRITÓRIO E AGÊNCIA DE MODELOS • www.querofazerlive.com
+  </div>
+</body>
+</html>
+      `;
+
+      // Criar blob e download
+      const blob = new Blob([contractContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `contrato_${contractData.nome.replace(/\s+/g, '_')}.html`;
+      link.click();
+      URL.revokeObjectURL(url);
       
       // Gerar URL do contrato
       const contractUrlGenerated = generateContractUrl();
       setContractUrl(contractUrlGenerated);
 
     } catch (err) {
-      console.error('Erro ao baixar PDF:', err);
+      console.error('Erro ao baixar contrato:', err);
       setError('Erro ao baixar o contrato. Tente novamente.');
     }
   };
@@ -77,7 +158,7 @@ export default function ContractPage() {
         setContractUrl(finalContractUrl);
       }
 
-      const message = `Olá! Assinei o contrato de modelo.\n\nNome: ${contractData.nome}\nCPF: ${contractData.cpf}\nTelefone: ${contractData.telefone}\nE-mail: ${contractData.email}\n\nAssinatura 1: ${signature1Text}\nAssinatura 2: ${signature2Text}\n\nLink do contrato: ${finalContractUrl}`;
+      const message = `Olá! Assinei o contrato de modelo.\n\nNome: ${contractData.nome}\nCPF: ${contractData.cpf}\nTelefone: ${contractData.telefone}\nE-mail: ${contractData.email}\nNome nas Plataformas: ${contractData.nomePlataforma || 'Não informado'}\nNome Artístico: ${contractData.nomeArtistico || 'Não informado'}\n\nAssinatura 1: ${signature1Text}\nAssinatura 2: ${signature2Text}\n\nLink do contrato: ${finalContractUrl}`;
       const whatsappUrl = `https://wa.me/5571993559126?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     } catch (err) {
@@ -147,6 +228,26 @@ export default function ContractPage() {
                 onChange={(e) => setContractData({...contractData, email: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
                 required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nome nas Plataformas</label>
+              <input
+                type="text"
+                value={contractData.nomePlataforma}
+                onChange={(e) => setContractData({...contractData, nomePlataforma: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
+                placeholder="Nome usado nas plataformas"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nome Artístico</label>
+              <input
+                type="text"
+                value={contractData.nomeArtistico}
+                onChange={(e) => setContractData({...contractData, nomeArtistico: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
+                placeholder="Nome artístico ou fictício"
               />
             </div>
           </div>

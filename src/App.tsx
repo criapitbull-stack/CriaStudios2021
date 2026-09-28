@@ -18,7 +18,24 @@ import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 function App() {
   const [route, setRoute] = useState(window.location.hash);
+  const [contractId, setContractId] = useState<string | null>(null);
   const { session, loading, isAdmin } = useAdminAuth();
+
+  useEffect(() => {
+    // Verificar se é rota de contrato pelo pathname
+    const pathname = window.location.pathname;
+    if (pathname.startsWith('/contrato/')) {
+      const id = pathname.replace('/contrato/', '');
+      setContractId(id);
+      setRoute('#contrato');
+    } else if (pathname === '/contrato') {
+      setContractId(null);
+      setRoute('#contrato');
+    } else {
+      setContractId(null);
+      setRoute(window.location.hash);
+    }
+  }, []);
 
   useEffect(() => {
     const onHash = () => setRoute(window.location.hash);
@@ -55,7 +72,7 @@ function App() {
   }
 
   if (isContractRoute) {
-    return <ContractPage />;
+    return <ContractPage contractId={contractId} />;
   }
 
   return (
