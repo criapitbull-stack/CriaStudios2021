@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Download, Send, Check, AlertCircle, ArrowLeft, Type } from 'lucide-react';
 
 interface ContractData {
@@ -6,8 +6,6 @@ interface ContractData {
   cpf: string;
   telefone: string;
   email: string;
-  nomePlataforma: string;
-  nomeArtistico: string;
 }
 
 interface ContractPageProps {
@@ -20,9 +18,46 @@ export default function ContractPage({ contractId }: ContractPageProps) {
     cpf: '',
     telefone: '',
     email: '',
-    nomePlataforma: '',
-    nomeArtistico: '',
   });
+  
+  const [pdfUrl] = useState<string>('/Contrato_REISM_King_Cinema_Profissional_v2.pdf');
+  const [signature1Text, setSignature1Text] = useState('');
+  const [signature2Text, setSignature2Text] = useState('');
+  const [contractUrl, setContractUrl] = useState('');
+  const [error, setError] = useState('');
+  const [showSignature1, setShowSignature1] = useState(false);
+  const [showSignature2, setShowSignature2] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Carregar dados do contrato se tiver ID
+  useEffect(() => {
+    if (contractId) {
+      const savedData = localStorage.getItem(`contract_${contractId}`);
+      if (savedData) {
+        try {
+          const data = JSON.parse(savedData);
+          setContractData(data.contractData);
+          setSignature1Text(data.signature1Text);
+          setSignature2Text(data.signature2Text);
+        } catch (err) {
+          console.error('Erro ao carregar dados do contrato:', err);
+        }
+      }
+    }
+  }, [contractId]);
+
+  // Salvar dados automaticamente
+  useEffect(() => {
+    if (contractId && (contractData.nome || contractData.cpf || signature1Text || signature2Text)) {
+      const dataToSave = {
+        contractData,
+        signature1Text,
+        signature2Text,
+        timestamp: Date.now()
+      };
+      localStorage.setItem(`contract_${contractId}`, JSON.stringify(dataToSave));
+    }
+  }, [contractData, signature1Text, signature2Text, contractId]);
   
   const [pdfUrl] = useState<string>('/Contrato_REISM_King_Cinema_Profissional_v2.pdf');
   const [signature1Text, setSignature1Text] = useState('');
@@ -34,9 +69,8 @@ export default function ContractPage({ contractId }: ContractPageProps) {
 
   const generateContractUrl = () => {
     const id = contractId || Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-    const today = new Date().toLocaleDateString('pt-BR').replace(/\//g, '');
     const baseUrl = window.location.origin;
-    return `${baseUrl}/#CONTRATO${id}${today}`;
+    return `${baseUrl}/#CONTRATO${id}`;
   };
 
   const handleDownload = async () => {
@@ -50,6 +84,7 @@ export default function ContractPage({ contractId }: ContractPageProps) {
       return;
     }
 
+    setIsLoading(true);
     setError('');
 
     try {
@@ -74,71 +109,52 @@ export default function ContractPage({ contractId }: ContractPageProps) {
         const firstPage = pages[0];
         const { width, height } = firstPage.getSize();
         
-        // Adicionar dados da modelo
-        firstPage.drawText(`Nome: ${contractData.nome}`, {
-          x: 50,
-          y: height - 200,
-          size: 12,
-          font: boldFont,
-          color: rgb(0, 0, 0),
-        });
-        
-        firstPage.drawText(`CPF: ${contractData.cpf}`, {
-          x: 50,
-          y: height - 220,
-          size: 12,
-          font: boldFont,
-          color: rgb(0, 0, 0),
-        });
-        
-        firstPage.drawText(`Telefone: ${contractData.telefone}`, {
-          x: 50,
-          y: height - 240,
-          size: 12,
-          font: boldFont,
-          color: rgb(0, 0, 0),
-        });
-        
-        firstPage.drawText(`E-mail: ${contractData.email}`, {
-          x: 50,
-          y: height - 260,
-          size: 12,
-          font: boldFont,
-          color: rgb(0, 0, 0),
-        });
-        
-        if (contractData.nomePlataforma) {
-          firstPage.drawText(`Nome nas Plataformas: ${contractData.nomePlataforma}`, {
-            x: 50,
-            y: height - 280,
-            size: 12,
-            font: boldFont,
-            color: rgb(0, 0, 0),
-          });
-        }
-        
-        if (contractData.nomeArtistico) {
-          firstPage.drawText(`Nome Artístico: ${contractData.nomeArtistico}`, {
-            x: 50,
-            y: height - 300,
-            size: 12,
-            font: boldFont,
-            color: rgb(0, 0, 0),
-          });
-        }
-        
-        // Adicionar primeira assinatura
-        firstPage.drawText(`Assinatura: ${signature1Text}`, {
-          x: 50,
-          y: height - 350,
-          size: 14,
+        // Coordenadas aproximadas baseadas no PDF original
+        // DADOS DA MODELO (primeira página)
+        firstPage.drawText(contractData.nome, {
+          x: 120,
+          y: height - 420,
+          size: 11,
           font: font,
           color: rgb(0, 0, 0),
         });
         
-        firstPage.drawText(`Data: ${today}`, {
-          x: 50,
-          y: height - 370,
+        firstPage.drawText(contractData.cpf, {
+          x: 120,
+          y: height - 445,
+          size: 11,
+          font: font,
+          color: rgb(0, 0, 0),
+        });
+        
+        firstPage.drawText(contractData.telefone, {
+          x: 350,
+          y: height - 445,
+          size: 11,
+          font: font,
+          color: rgb(0, 0, 0),
+        });
+        
+        firstPage.drawText(contractData.email, {
+          x: 120,
+          y: height - 470,
+          size: 11,
+          font: font,
+          color: rgb(0, 0, 0),
+        });
+        
+        // ASSINATURAS - primeira página
+        firstPage.drawText(signature1Text, {
+          x: 350,
+          y: height - 200,
+          size: 12,
+          font: font,
+          color: rgb(0, 0, 0),
+        });
+        
+        firstPage.drawText(today, {
+          x: 350,
+          y: height - 220,
           size: 10,
           font: font,
           color: rgb(0, 0, 0),
@@ -150,17 +166,18 @@ export default function ContractPage({ contractId }: ContractPageProps) {
         const lastPage = pages[pages.length - 1];
         const { width, height } = lastPage.getSize();
         
-        lastPage.drawText(`Assinatura: ${signature2Text}`, {
-          x: 50,
-          y: 100,
-          size: 14,
+        // ASSINATURAS - última página
+        lastPage.drawText(signature2Text, {
+          x: 350,
+          y: height - 200,
+          size: 12,
           font: font,
           color: rgb(0, 0, 0),
         });
         
-        lastPage.drawText(`Data: ${today}`, {
-          x: 50,
-          y: 80,
+        lastPage.drawText(today, {
+          x: 350,
+          y: height - 220,
           size: 10,
           font: font,
           color: rgb(0, 0, 0),
@@ -188,6 +205,8 @@ export default function ContractPage({ contractId }: ContractPageProps) {
     } catch (err) {
       console.error('Erro ao gerar PDF:', err);
       setError('Erro ao gerar o contrato. Tente novamente.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -211,7 +230,7 @@ export default function ContractPage({ contractId }: ContractPageProps) {
         setContractUrl(finalContractUrl);
       }
 
-      const message = `Olá! Assinei o contrato de modelo.\n\nNome: ${contractData.nome}\nCPF: ${contractData.cpf}\nTelefone: ${contractData.telefone}\nE-mail: ${contractData.email}\nNome nas Plataformas: ${contractData.nomePlataforma || 'Não informado'}\nNome Artístico: ${contractData.nomeArtistico || 'Não informado'}\n\nAssinatura 1: ${signature1Text}\nAssinatura 2: ${signature2Text}\n\nLink do contrato: ${finalContractUrl}`;
+      const message = `Olá! Assinei o contrato de modelo.\n\nNome: ${contractData.nome}\nCPF: ${contractData.cpf}\nTelefone: ${contractData.telefone}\nE-mail: ${contractData.email}\n\nAssinatura 1: ${signature1Text}\nAssinatura 2: ${signature2Text}\n\nLink do contrato: ${finalContractUrl}`;
       const whatsappUrl = `https://wa.me/5571993559126?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     } catch (err) {
@@ -281,26 +300,6 @@ export default function ContractPage({ contractId }: ContractPageProps) {
                 onChange={(e) => setContractData({...contractData, email: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
                 required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nome nas Plataformas</label>
-              <input
-                type="text"
-                value={contractData.nomePlataforma}
-                onChange={(e) => setContractData({...contractData, nomePlataforma: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
-                placeholder="Nome usado nas plataformas"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nome Artístico</label>
-              <input
-                type="text"
-                value={contractData.nomeArtistico}
-                onChange={(e) => setContractData({...contractData, nomeArtistico: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
-                placeholder="Nome artístico ou fictício"
               />
             </div>
           </div>
@@ -407,10 +406,20 @@ export default function ContractPage({ contractId }: ContractPageProps) {
         <div className="flex flex-col sm:flex-row gap-4">
           <button
             onClick={handleDownload}
-            className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold rounded-lg hover:from-rose-600 hover:to-rose-700 transition-all text-sm"
+            disabled={isLoading}
+            className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold rounded-lg hover:from-rose-600 hover:to-rose-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
-            <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-            Baixar Contrato
+            {isLoading ? (
+              <>
+                <span className="animate-spin">⏳</span>
+                Gerando PDF...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+                Baixar Contrato
+              </>
+            )}
           </button>
 
           <button
