@@ -22,23 +22,44 @@ function App() {
   const { session, loading, isAdmin } = useAdminAuth();
 
   useEffect(() => {
-    // Verificar se é rota de contrato pelo pathname
-    const pathname = window.location.pathname;
-    if (pathname.startsWith('/contrato/')) {
-      const id = pathname.replace('/contrato/', '');
+    // Verificar se é rota de contrato pelo hash
+    const hash = window.location.hash;
+    if (hash.startsWith('#CONTRATO')) {
+      const id = hash.replace('#CONTRATO', '');
       setContractId(id);
       setRoute('#contrato');
-    } else if (pathname === '/contrato') {
+    } else if (hash.startsWith('#contrato')) {
+      const id = hash.replace('#contrato', '');
+      setContractId(id);
+      setRoute('#contrato');
+    } else if (hash === '#contrato') {
       setContractId(null);
       setRoute('#contrato');
     } else {
       setContractId(null);
-      setRoute(window.location.hash);
+      setRoute(hash);
     }
   }, []);
 
   useEffect(() => {
-    const onHash = () => setRoute(window.location.hash);
+    const onHash = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#CONTRATO')) {
+        const id = hash.replace('#CONTRATO', '');
+        setContractId(id);
+        setRoute('#contrato');
+      } else if (hash.startsWith('#contrato')) {
+        const id = hash.replace('#contrato', '');
+        setContractId(id);
+        setRoute('#contrato');
+      } else if (hash === '#contrato') {
+        setContractId(null);
+        setRoute('#contrato');
+      } else {
+        setContractId(null);
+        setRoute(hash);
+      }
+    };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);

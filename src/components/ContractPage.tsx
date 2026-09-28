@@ -34,11 +34,12 @@ export default function ContractPage({ contractId }: ContractPageProps) {
 
   const generateContractUrl = () => {
     const id = contractId || Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+    const today = new Date().toLocaleDateString('pt-BR').replace(/\//g, '');
     const baseUrl = window.location.origin;
-    return `${baseUrl}/#CONTRATO${id}`;
+    return `${baseUrl}/#CONTRATO${id}${today}`;
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!signature1Text || !signature2Text) {
       setError('Por favor, assine o contrato em ambos os campos.');
       return;
@@ -52,89 +53,141 @@ export default function ContractPage({ contractId }: ContractPageProps) {
     setError('');
 
     try {
-      // Criar documento HTML com todos os dados preenchidos
+      // Usar pdf-lib para modificar o PDF original
+      const { PDFDocument, rgb, StandardFonts } = await import('pdf-lib');
+      const pdfBytes = await fetch(pdfUrl).then(res => {
+        if (!res.ok) throw new Error('Não foi possível carregar o PDF');
+        return res.arrayBuffer();
+      });
+      const pdfDoc = await PDFDocument.load(pdfBytes);
+      
+      // Adicionar fontes
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      
+      // Obter páginas
+      const pages = pdfDoc.getPages();
       const today = new Date().toLocaleDateString('pt-BR');
-      const contractContent = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Contrato - ${contractData.nome}</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
-    .header { text-align: center; margin-bottom: 30px; }
-    .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; }
-    .signature-box { margin-top: 30px; padding: 20px; border: 2px solid #000; }
-    .signature { font-family: cursive; font-size: 18px; margin: 10px 0; }
-    .label { font-weight: bold; }
-    .data { margin: 5px 0; }
-    .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE AGENCIAMENTO DE MODELO DIGITAL</h1>
-  </div>
-
-  <div class="section">
-    <h2>CONTRATANTE / AGÊNCIA</h2>
-    <div class="data"><span class="label">REIS PRODUÇÕES CINEMATOGRÁFICAS</span></div>
-    <div class="data"><span class="label">CNPJ:</span> 69.209.066/0001-92</div>
-    <div class="data"><span class="label">Website:</span> www.querofazerlive.com</div>
-  </div>
-
-  <div class="section">
-    <h2>MODELO</h2>
-    <div class="data"><span class="label">Nome:</span> ${contractData.nome}</div>
-    <div class="data"><span class="label">CPF:</span> ${contractData.cpf}</div>
-    <div class="data"><span class="label">Telefone:</span> ${contractData.telefone}</div>
-    <div class="data"><span class="label">E-mail:</span> ${contractData.email}</div>
-    <div class="data"><span class="label">Nome nas Plataformas:</span> ${contractData.nomePlataforma || 'Não informado'}</div>
-    <div class="data"><span class="label">Nome Artístico:</span> ${contractData.nomeArtistico || 'Não informado'}</div>
-  </div>
-
-  <div class="section">
-    <h2>CONTRATO DE PRESTAÇÃO DE SERVIÇOS</h2>
-    <p>O presente contrato tem por objeto a prestação de serviços de agenciamento, divulgação, orientação e suporte operacional à CONTRATADA, para realização de atividades digitais, incluindo transmissões ao vivo (lives), videochamadas e divulgação de perfil em plataformas destinadas ao público em geral.</p>
-  </div>
-
-  <div class="signature-box">
-    <h3>ASSINATURA - PÁGINA DE DADOS</h3>
-    <div class="data"><span class="label">Assinatura da Modelo:</span></div>
-    <div class="signature">${signature1Text}</div>
-    <div class="data"><span class="label">Data:</span> ${today}</div>
-  </div>
-
-  <div class="signature-box">
-    <h3>ASSINATURA - FINAL DO CONTRATO</h3>
-    <div class="data"><span class="label">Assinatura da Modelo:</span></div>
-    <div class="signature">${signature2Text}</div>
-    <div class="data"><span class="label">Data:</span> ${today}</div>
-  </div>
-
-  <div class="footer">
-    KING CINEMA PRODUCTIONS • REISM ESCRITÓRIO E AGÊNCIA DE MODELOS • www.querofazerlive.com
-  </div>
-</body>
-</html>
-      `;
-
-      // Criar blob e download
-      const blob = new Blob([contractContent], { type: 'text/html' });
+      
+      // Adicionar dados na primeira página (onde estão os campos da modelo)
+      if (pages.length > 0) {
+        const firstPage = pages[0];
+        const { width, height } = firstPage.getSize();
+        
+        // Adicionar dados da modelo
+        firstPage.drawText(`Nome: ${contractData.nome}`, {
+          x: 50,
+          y: height - 200,
+          size: 12,
+          font: boldFont,
+          color: rgb(0, 0, 0),
+        });
+        
+        firstPage.drawText(`CPF: ${contractData.cpf}`, {
+          x: 50,
+          y: height - 220,
+          size: 12,
+          font: boldFont,
+          color: rgb(0, 0, 0),
+        });
+        
+        firstPage.drawText(`Telefone: ${contractData.telefone}`, {
+          x: 50,
+          y: height - 240,
+          size: 12,
+          font: boldFont,
+          color: rgb(0, 0, 0),
+        });
+        
+        firstPage.drawText(`E-mail: ${contractData.email}`, {
+          x: 50,
+          y: height - 260,
+          size: 12,
+          font: boldFont,
+          color: rgb(0, 0, 0),
+        });
+        
+        if (contractData.nomePlataforma) {
+          firstPage.drawText(`Nome nas Plataformas: ${contractData.nomePlataforma}`, {
+            x: 50,
+            y: height - 280,
+            size: 12,
+            font: boldFont,
+            color: rgb(0, 0, 0),
+          });
+        }
+        
+        if (contractData.nomeArtistico) {
+          firstPage.drawText(`Nome Artístico: ${contractData.nomeArtistico}`, {
+            x: 50,
+            y: height - 300,
+            size: 12,
+            font: boldFont,
+            color: rgb(0, 0, 0),
+          });
+        }
+        
+        // Adicionar primeira assinatura
+        firstPage.drawText(`Assinatura: ${signature1Text}`, {
+          x: 50,
+          y: height - 350,
+          size: 14,
+          font: font,
+          color: rgb(0, 0, 0),
+        });
+        
+        firstPage.drawText(`Data: ${today}`, {
+          x: 50,
+          y: height - 370,
+          size: 10,
+          font: font,
+          color: rgb(0, 0, 0),
+        });
+      }
+      
+      // Adicionar segunda assinatura na última página
+      if (pages.length > 0) {
+        const lastPage = pages[pages.length - 1];
+        const { width, height } = lastPage.getSize();
+        
+        lastPage.drawText(`Assinatura: ${signature2Text}`, {
+          x: 50,
+          y: 100,
+          size: 14,
+          font: font,
+          color: rgb(0, 0, 0),
+        });
+        
+        lastPage.drawText(`Data: ${today}`, {
+          x: 50,
+          y: 80,
+          size: 10,
+          font: font,
+          color: rgb(0, 0, 0),
+        });
+      }
+      
+      // Salvar PDF modificado
+      const pdfBytesModified = await pdfDoc.save();
+      const blob = new Blob([pdfBytesModified], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
+      
+      // Download do PDF
       const link = document.createElement('a');
       link.href = url;
-      link.download = `contrato_${contractData.nome.replace(/\s+/g, '_')}.html`;
+      link.download = `contrato_${contractData.nome.replace(/\s+/g, '_')}.pdf`;
       link.click();
-      URL.revokeObjectURL(url);
+      
+      // Limpar URL temporária
+      setTimeout(() => URL.revokeObjectURL(url), 100);
       
       // Gerar URL do contrato
       const contractUrlGenerated = generateContractUrl();
       setContractUrl(contractUrlGenerated);
 
     } catch (err) {
-      console.error('Erro ao baixar contrato:', err);
-      setError('Erro ao baixar o contrato. Tente novamente.');
+      console.error('Erro ao gerar PDF:', err);
+      setError('Erro ao gerar o contrato. Tente novamente.');
     }
   };
 
