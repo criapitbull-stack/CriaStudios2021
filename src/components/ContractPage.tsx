@@ -20,7 +20,6 @@ export default function ContractPage() {
   const [signature1Text, setSignature1Text] = useState('');
   const [signature2Text, setSignature2Text] = useState('');
   const [contractUrl, setContractUrl] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
   const [showSignature1, setShowSignature1] = useState(false);
   const [showSignature2, setShowSignature2] = useState(false);
@@ -42,15 +41,11 @@ export default function ContractPage() {
       return;
     }
 
-    setIsGenerating(true);
     setError('');
 
     try {
-      // Download do PDF original
-      const link = document.createElement('a');
-      link.href = pdfUrl;
-      link.download = `contrato_${contractData.nome.replace(/\s+/g, '_')}.pdf`;
-      link.click();
+      // Download do PDF original - abre em nova aba para funcionar em mobile
+      window.open(pdfUrl, '_blank');
       
       // Gerar URL do contrato
       const contractUrlGenerated = generateContractUrl();
@@ -59,20 +54,36 @@ export default function ContractPage() {
     } catch (err) {
       console.error('Erro ao baixar PDF:', err);
       setError('Erro ao baixar o contrato. Tente novamente.');
-    } finally {
-      setIsGenerating(false);
     }
   };
 
   const handleSendWhatsApp = () => {
-    if (!contractUrl) {
-      setError('Primeiro baixe o contrato para criar o link.');
+    if (!contractData.nome || !contractData.cpf) {
+      setError('Por favor, preencha nome e CPF.');
       return;
     }
 
-    const message = `Olá! Assinei o contrato de modelo.\n\nNome: ${contractData.nome}\nCPF: ${contractData.cpf}\nTelefone: ${contractData.telefone}\nE-mail: ${contractData.email}\n\nAssinatura 1: ${signature1Text}\nAssinatura 2: ${signature2Text}\n\nLink do contrato: ${contractUrl}`;
-    const whatsappUrl = `https://wa.me/5571993559126?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    if (!signature1Text || !signature2Text) {
+      setError('Por favor, assine o contrato em ambos os campos.');
+      return;
+    }
+
+    setError('');
+
+    try {
+      // Gerar URL do contrato se ainda não existir
+      const finalContractUrl = contractUrl || generateContractUrl();
+      if (!contractUrl) {
+        setContractUrl(finalContractUrl);
+      }
+
+      const message = `Olá! Assinei o contrato de modelo.\n\nNome: ${contractData.nome}\nCPF: ${contractData.cpf}\nTelefone: ${contractData.telefone}\nE-mail: ${contractData.email}\n\nAssinatura 1: ${signature1Text}\nAssinatura 2: ${signature2Text}\n\nLink do contrato: ${finalContractUrl}`;
+      const whatsappUrl = `https://wa.me/5571993559126?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    } catch (err) {
+      console.error('Erro ao enviar WhatsApp:', err);
+      setError('Erro ao enviar WhatsApp. Tente novamente.');
+    }
   };
 
   const goBack = () => {
@@ -242,26 +253,15 @@ export default function ContractPage() {
         <div className="flex flex-col sm:flex-row gap-4">
           <button
             onClick={handleDownload}
-            disabled={isGenerating}
-            className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold rounded-lg hover:from-rose-600 hover:to-rose-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold rounded-lg hover:from-rose-600 hover:to-rose-700 transition-all text-sm"
           >
-            {isGenerating ? (
-              <>
-                <span className="animate-spin">⏳</span>
-                Gerando...
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-                Baixar Contrato
-              </>
-            )}
+            <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+            Baixar Contrato
           </button>
 
           <button
             onClick={handleSendWhatsApp}
-            disabled={!contractUrl}
-            className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all text-sm"
           >
             <Send className="w-4 h-4 sm:w-5 sm:h-5" />
             Enviar via WhatsApp
@@ -277,8 +277,8 @@ export default function ContractPage() {
 
         {contractUrl && (
           <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-green-700 font-medium mb-2 text-sm">Contrato gerado com sucesso!</p>
-            <p className="text-xs sm:text-sm text-green-600 break-all">Link do contrato: {contractUrl}</p>
+            <p className="text-green-700 font-medium mb-2 text-sm">Dados preenchidos com sucesso!</p>
+            <p className="text-xs sm:text-sm text-green-600">Você pode baixar o contrato ou enviar via WhatsApp.</p>
           </div>
         )}
       </div>
