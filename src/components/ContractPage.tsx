@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { FileText, Download, Send, PenTool, Check, AlertCircle, ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
+import { FileText, Download, Send, Check, AlertCircle, ArrowLeft, Type } from 'lucide-react';
 
 interface ContractData {
   nome: string;
@@ -17,84 +17,13 @@ export default function ContractPage() {
   });
   
   const [pdfUrl] = useState<string>('/Contrato_REISM_King_Cinema_Profissional_v2.pdf');
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [signature1Data, setSignature1Data] = useState('');
-  const [signature2Data, setSignature2Data] = useState('');
+  const [signature1Text, setSignature1Text] = useState('');
+  const [signature2Text, setSignature2Text] = useState('');
   const [contractUrl, setContractUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
-  const [showCanvas1, setShowCanvas1] = useState(false);
-  const [showCanvas2, setShowCanvas2] = useState(false);
-  
-  const canvasRef1 = useRef<HTMLCanvasElement>(null);
-  const canvasRef2 = useRef<HTMLCanvasElement>(null);
-
-  const setupCanvas = (canvas: HTMLCanvasElement | null) => {
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-  };
-
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>, signature: 'signature1' | 'signature2') => {
-    setIsDrawing(true);
-    const canvas = signature === 'signature1' ? canvasRef1.current : canvasRef2.current;
-    if (!canvas) return;
-    
-    setupCanvas(canvas);
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    ctx.beginPath();
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-  };
-
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return;
-    
-    const canvas = (e.target as HTMLCanvasElement);
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-    ctx.stroke();
-  };
-
-  const stopDrawing = (signature: 'signature1' | 'signature2') => {
-    if (!isDrawing) return;
-    
-    const canvas = signature === 'signature1' ? canvasRef1.current : canvasRef2.current;
-    if (!canvas) return;
-    
-    const dataUrl = canvas.toDataURL();
-    if (signature === 'signature1') {
-      setSignature1Data(dataUrl);
-    } else {
-      setSignature2Data(dataUrl);
-    }
-    
-    setIsDrawing(false);
-  };
-
-  const clearSignature = (signature: 'signature1' | 'signature2') => {
-    const canvas = signature === 'signature1' ? canvasRef1.current : canvasRef2.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    if (signature === 'signature1') {
-      setSignature1Data('');
-    } else {
-      setSignature2Data('');
-    }
-  };
+  const [showSignature1, setShowSignature1] = useState(false);
+  const [showSignature2, setShowSignature2] = useState(false);
 
   const generateContractUrl = () => {
     const contractId = Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
@@ -103,7 +32,7 @@ export default function ContractPage() {
   };
 
   const handleDownload = () => {
-    if (!signature1Data || !signature2Data) {
+    if (!signature1Text || !signature2Text) {
       setError('Por favor, assine o contrato em ambos os campos.');
       return;
     }
@@ -137,11 +66,11 @@ export default function ContractPage() {
 
   const handleSendWhatsApp = () => {
     if (!contractUrl) {
-      setError('Primeiro gere o contrato para criar o link.');
+      setError('Primeiro baixe o contrato para criar o link.');
       return;
     }
 
-    const message = `Olá! Assinei o contrato de modelo.\n\nNome: ${contractData.nome}\nCPF: ${contractData.cpf}\nTelefone: ${contractData.telefone}\nE-mail: ${contractData.email}\n\nLink do contrato: ${contractUrl}`;
+    const message = `Olá! Assinei o contrato de modelo.\n\nNome: ${contractData.nome}\nCPF: ${contractData.cpf}\nTelefone: ${contractData.telefone}\nE-mail: ${contractData.email}\n\nAssinatura 1: ${signature1Text}\nAssinatura 2: ${signature2Text}\n\nLink do contrato: ${contractUrl}`;
     const whatsappUrl = `https://wa.me/5571993559126?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -151,31 +80,31 @@ export default function ContractPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
+    <div className="min-h-screen bg-gray-100 py-4 px-2 sm:py-8 sm:px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-              <FileText className="w-6 h-6" />
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
+              <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
               Assinatura de Contrato
             </h1>
             <button
               onClick={goBack}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors text-sm"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
               Voltar
             </button>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
               <input
                 type="text"
                 value={contractData.nome}
                 onChange={(e) => setContractData({...contractData, nome: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
                 required
               />
             </div>
@@ -185,7 +114,7 @@ export default function ContractPage() {
                 type="text"
                 value={contractData.cpf}
                 onChange={(e) => setContractData({...contractData, cpf: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
                 required
               />
             </div>
@@ -195,7 +124,7 @@ export default function ContractPage() {
                 type="text"
                 value={contractData.telefone}
                 onChange={(e) => setContractData({...contractData, telefone: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
                 required
               />
             </div>
@@ -205,7 +134,7 @@ export default function ContractPage() {
                 type="email"
                 value={contractData.email}
                 onChange={(e) => setContractData({...contractData, email: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
                 required
               />
             </div>
@@ -213,7 +142,7 @@ export default function ContractPage() {
         </div>
 
         {/* Visualizador de PDF */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-800">Contrato</h2>
             <a
@@ -230,52 +159,44 @@ export default function ContractPage() {
             <iframe
               src={pdfUrl}
               className="w-full"
-              style={{ height: '80vh', minHeight: '600px', border: 'none' }}
+              style={{ height: '60vh', minHeight: '400px', border: 'none' }}
               title="Contrato PDF"
             />
           </div>
           
-          <p className="text-sm text-gray-500 mt-2 text-center">
-            Se o PDF não carregar, clique em "Abrir em nova aba"
+          <p className="text-xs sm:text-sm text-gray-500 mt-2 text-center">
+            Role para ver todas as páginas do contrato
           </p>
         </div>
 
         {/* Áreas de assinatura */}
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <PenTool className="w-5 h-5" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
+          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2 text-sm sm:text-base">
+              <Type className="w-4 h-4 sm:w-5 sm:h-5" />
               Assinatura - Página de Dados
             </h3>
             <button
-              onClick={() => setShowCanvas1(!showCanvas1)}
-              className="w-full mb-4 px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
+              onClick={() => setShowSignature1(!showSignature1)}
+              className="w-full mb-4 px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors text-sm"
             >
-              {showCanvas1 ? 'Ocultar área de assinatura' : 'Mostrar área de assinatura'}
+              {showSignature1 ? 'Ocultar campo de assinatura' : 'Mostrar campo de assinatura'}
             </button>
             
-            {showCanvas1 && (
+            {showSignature1 && (
               <>
-                <canvas
-                  ref={canvasRef1}
-                  width={400}
-                  height={150}
-                  className="border-2 border-gray-300 rounded-lg bg-white cursor-crosshair w-full"
-                  onMouseDown={(e) => startDrawing(e, 'signature1')}
-                  onMouseMove={draw}
-                  onMouseUp={() => stopDrawing('signature1')}
-                  onMouseLeave={() => stopDrawing('signature1')}
+                <input
+                  type="text"
+                  value={signature1Text}
+                  onChange={(e) => setSignature1Text(e.target.value)}
+                  placeholder="Digite seu nome completo como assinatura"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-rose-500 text-sm"
+                  style={{ fontFamily: 'cursive', fontSize: '18px' }}
                 />
                 <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => clearSignature('signature1')}
-                    className="text-sm text-rose-600 hover:text-rose-800"
-                  >
-                    Limpar
-                  </button>
-                  {signature1Data && (
-                    <span className="text-sm text-green-600 flex items-center gap-1">
-                      <Check className="w-4 h-4" /> Assinado
+                  {signature1Text && (
+                    <span className="text-xs sm:text-sm text-green-600 flex items-center gap-1">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4" /> Assinado
                     </span>
                   )}
                 </div>
@@ -283,40 +204,32 @@ export default function ContractPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <PenTool className="w-5 h-5" />
+          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2 text-sm sm:text-base">
+              <Type className="w-4 h-4 sm:w-5 sm:h-5" />
               Assinatura - Final do Contrato
             </h3>
             <button
-              onClick={() => setShowCanvas2(!showCanvas2)}
-              className="w-full mb-4 px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
+              onClick={() => setShowSignature2(!showSignature2)}
+              className="w-full mb-4 px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors text-sm"
             >
-              {showCanvas2 ? 'Ocultar área de assinatura' : 'Mostrar área de assinatura'}
+              {showSignature2 ? 'Ocultar campo de assinatura' : 'Mostrar campo de assinatura'}
             </button>
             
-            {showCanvas2 && (
+            {showSignature2 && (
               <>
-                <canvas
-                  ref={canvasRef2}
-                  width={400}
-                  height={150}
-                  className="border-2 border-gray-300 rounded-lg bg-white cursor-crosshair w-full"
-                  onMouseDown={(e) => startDrawing(e, 'signature2')}
-                  onMouseMove={draw}
-                  onMouseUp={() => stopDrawing('signature2')}
-                  onMouseLeave={() => stopDrawing('signature2')}
+                <input
+                  type="text"
+                  value={signature2Text}
+                  onChange={(e) => setSignature2Text(e.target.value)}
+                  placeholder="Digite seu nome completo como assinatura"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-rose-500 text-sm"
+                  style={{ fontFamily: 'cursive', fontSize: '18px' }}
                 />
                 <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => clearSignature('signature2')}
-                    className="text-sm text-rose-600 hover:text-rose-800"
-                  >
-                    Limpar
-                  </button>
-                  {signature2Data && (
-                    <span className="text-sm text-green-600 flex items-center gap-1">
-                      <Check className="w-4 h-4" /> Assinado
+                  {signature2Text && (
+                    <span className="text-xs sm:text-sm text-green-600 flex items-center gap-1">
+                      <Check className="w-3 h-3 sm:w-4 sm:h-4" /> Assinado
                     </span>
                   )}
                 </div>
@@ -330,7 +243,7 @@ export default function ContractPage() {
           <button
             onClick={handleDownload}
             disabled={isGenerating}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold rounded-lg hover:from-rose-600 hover:to-rose-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold rounded-lg hover:from-rose-600 hover:to-rose-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
             {isGenerating ? (
               <>
@@ -339,8 +252,8 @@ export default function ContractPage() {
               </>
             ) : (
               <>
-                <Download className="w-5 h-5" />
-                Baixar Contrato Assinado
+                <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+                Baixar Contrato
               </>
             )}
           </button>
@@ -348,15 +261,15 @@ export default function ContractPage() {
           <button
             onClick={handleSendWhatsApp}
             disabled={!contractUrl}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
-            <Send className="w-5 h-5" />
+            <Send className="w-4 h-4 sm:w-5 sm:h-5" />
             Enviar via WhatsApp
           </button>
         </div>
 
         {error && (
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700 text-sm">
             <AlertCircle className="w-5 h-5" />
             {error}
           </div>
@@ -364,8 +277,8 @@ export default function ContractPage() {
 
         {contractUrl && (
           <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-green-700 font-medium mb-2">Contrato gerado com sucesso!</p>
-            <p className="text-sm text-green-600 break-all">Link do contrato: {contractUrl}</p>
+            <p className="text-green-700 font-medium mb-2 text-sm">Contrato gerado com sucesso!</p>
+            <p className="text-xs sm:text-sm text-green-600 break-all">Link do contrato: {contractUrl}</p>
           </div>
         )}
       </div>
