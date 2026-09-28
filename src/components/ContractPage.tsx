@@ -17,8 +17,6 @@ export default function ContractPage() {
   });
   
   const [pdfUrl, setPdfUrl] = useState<string>('/Contrato_REISM_King_Cinema_Profissional_v2.pdf');
-  const [numPages, setNumPages] = useState<number>(0);
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const [isDrawing, setIsDrawing] = useState(false);
   const [signature1Data, setSignature1Data] = useState('');
   const [signature2Data, setSignature2Data] = useState('');
@@ -27,62 +25,9 @@ export default function ContractPage() {
   const [error, setError] = useState('');
   const [showCanvas1, setShowCanvas1] = useState(false);
   const [showCanvas2, setShowCanvas2] = useState(false);
-  const [useIframe, setUseIframe] = useState(false);
   
   const canvasRef1 = useRef<HTMLCanvasElement>(null);
   const canvasRef2 = useRef<HTMLCanvasElement>(null);
-  const pdfContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Carregar PDF usando pdf.js
-    const loadPdf = async () => {
-      try {
-        const pdfjsLib = await import('pdfjs-dist');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js`;
-        
-        console.log('Tentando carregar PDF:', pdfUrl);
-        const loadingTask = pdfjsLib.getDocument(pdfUrl);
-        const pdf = await loadingTask.promise;
-        console.log('PDF carregado com sucesso, páginas:', pdf.numPages);
-        setNumPages(pdf.numPages);
-        
-        // Renderizar primeira página
-        renderPage(pdf, 1);
-      } catch (err) {
-        console.error('Erro ao carregar PDF:', err);
-        setError('Erro ao carregar o PDF do contrato. Verifique se o arquivo existe.');
-      }
-    };
-
-    loadPdf();
-  }, [pdfUrl]);
-
-  const renderPage = async (pdf: any, pageNum: number) => {
-    try {
-      const page = await pdf.getPage(pageNum);
-      const scale = 1.5;
-      const viewport = page.getViewport({ scale });
-      
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
-      
-      const renderContext = {
-        canvasContext: context,
-        viewport: viewport,
-      };
-      
-      await page.render(renderContext).promise;
-      
-      if (pdfContainerRef.current) {
-        pdfContainerRef.current.innerHTML = '';
-        pdfContainerRef.current.appendChild(canvas);
-      }
-    } catch (err) {
-      console.error('Erro ao renderizar página:', err);
-    }
-  };
 
   const setupCanvas = (canvas: HTMLCanvasElement | null) => {
     if (!canvas) return;
@@ -173,7 +118,7 @@ export default function ContractPage() {
 
     try {
       // Usar pdf-lib para modificar o PDF original
-      const { PDFDocument, rgb } = await import('pdf-lib');
+      const { PDFDocument } = await import('pdf-lib');
       const pdfBytes = await fetch(pdfUrl).then(res => res.arrayBuffer());
       const pdfDoc = await PDFDocument.load(pdfBytes);
       
@@ -315,54 +260,24 @@ export default function ContractPage() {
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-800">Contrato</h2>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-              >
-                Anterior
-              </button>
-              <span className="text-sm text-gray-600">
-                Página {currentPage} de {numPages}
-              </span>
-              <button
-                onClick={() => setCurrentPage(Math.min(numPages, currentPage + 1))}
-                disabled={currentPage === numPages}
-                className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-              >
-                Próxima
-              </button>
-            </div>
+            <a
+              href={pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-rose-600 hover:text-rose-800"
+            >
+              Abrir em nova aba
+            </a>
           </div>
           
-          <div className="flex justify-center border border-gray-200 rounded-lg p-4 bg-gray-50" style={{ minHeight: '600px' }}>
-            {useIframe ? (
-              <iframe
-                src={pdfUrl}
-                className="w-full h-full"
-                style={{ minHeight: '600px', border: 'none' }}
-                title="Contrato PDF"
-              />
-            ) : (
-              <div 
-                ref={pdfContainerRef}
-                className="w-full h-full"
-                style={{ minHeight: '600px' }}
-              />
-            )}
+          <div className="border border-gray-200 rounded-lg overflow-hidden" style={{ height: '800px' }}>
+            <iframe
+              src={pdfUrl}
+              className="w-full h-full"
+              style={{ border: 'none' }}
+              title="Contrato PDF"
+            />
           </div>
-          
-          {error && (
-            <div className="mt-4 flex gap-2">
-              <button
-                onClick={() => setUseIframe(true)}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Tentar visualizador nativo
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Áreas de assinatura */}
