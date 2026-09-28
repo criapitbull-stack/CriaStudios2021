@@ -109,76 +109,92 @@ export default function ContractPage({ contractId }: ContractPageProps) {
         const firstPage = pages[0];
         const { width, height } = firstPage.getSize();
         
-        // Coordenadas aproximadas baseadas no PDF original
-        // DADOS DA MODELO (primeira página)
+        // DADOS DA MODELO - primeira página (coordenadas ajustadas para campos existentes)
+        // MODELO Nome: _______________________________
         firstPage.drawText(contractData.nome, {
           x: 120,
-          y: height - 420,
-          size: 11,
+          y: height - 350,
+          size: 10,
           font: font,
           color: rgb(0, 0, 0),
         });
         
+        // CPF: __________________
         firstPage.drawText(contractData.cpf, {
           x: 120,
-          y: height - 445,
-          size: 11,
+          y: height - 375,
+          size: 10,
           font: font,
           color: rgb(0, 0, 0),
         });
         
+        // Telefone: __________________
         firstPage.drawText(contractData.telefone, {
-          x: 350,
-          y: height - 445,
-          size: 11,
+          x: 120,
+          y: height - 400,
+          size: 10,
           font: font,
           color: rgb(0, 0, 0),
         });
         
+        // E-mail: _____________________________________________
         firstPage.drawText(contractData.email, {
           x: 120,
-          y: height - 470,
-          size: 11,
-          font: font,
-          color: rgb(0, 0, 0),
-        });
-        
-        // ASSINATURAS - primeira página
-        firstPage.drawText(signature1Text, {
-          x: 350,
-          y: height - 200,
-          size: 12,
-          font: font,
-          color: rgb(0, 0, 0),
-        });
-        
-        firstPage.drawText(today, {
-          x: 350,
-          y: height - 220,
+          y: height - 425,
           size: 10,
           font: font,
           color: rgb(0, 0, 0),
         });
       }
       
-      // Adicionar segunda assinatura na última página
-      if (pages.length > 0) {
-        const lastPage = pages[pages.length - 1];
+      // Adicionar dados na última página (ASSINATURAS)
+      if (pages.length > 1) {
+        const lastPage = pages[1];
         const { width, height } = lastPage.getSize();
         
-        // ASSINATURAS - última página
-        lastPage.drawText(signature2Text, {
-          x: 350,
-          y: height - 200,
-          size: 12,
+        // ASSINATURAS - última página (coordenadas ajustadas para campos existentes)
+        // CONTRATANTE / AGÊNCIA MODELO
+        // NOME DA MODELO EXEMPLO NOME VAI AQUI____________________________
+        lastPage.drawText(contractData.nome, {
+          x: 280,
+          y: height - 180,
+          size: 9,
           font: font,
           color: rgb(0, 0, 0),
         });
         
+        // Assinatura MODELO: _________________________
+        lastPage.drawText(signature1Text, {
+          x: 280,
+          y: height - 230,
+          size: 9,
+          font: font,
+          color: rgb(0, 0, 0),
+        });
+        
+        // Data MODELO: ____/____/________
         lastPage.drawText(today, {
-          x: 350,
-          y: height - 220,
-          size: 10,
+          x: 280,
+          y: height - 250,
+          size: 8,
+          font: font,
+          color: rgb(0, 0, 0),
+        });
+        
+        // Assinatura CONTRATANTE: _________________________
+        lastPage.drawText(signature2Text, {
+          x: 80,
+          y: height - 230,
+          size: 9,
+          font: font,
+          color: rgb(0, 0, 0),
+        });
+        
+        // Data CONTRATANTE: ____/____/________
+        lastPage.drawText(today, {
+          x: 80,
+          y: height - 250,
+          size: 8,
           font: font,
           color: rgb(0, 0, 0),
         });
