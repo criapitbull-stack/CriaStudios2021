@@ -1,15 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { FileText, Download, Send, PenTool, Check, AlertCircle } from 'lucide-react';
+import { FileText, Download, Send, PenTool, Check, AlertCircle, ArrowLeft } from 'lucide-react';
 
 interface ContractData {
   nome: string;
   cpf: string;
   telefone: string;
   email: string;
-  assinatura1: string;
-  assinatura2: string;
-  data1: string;
-  data2: string;
 }
 
 export default function ContractPage() {
@@ -18,45 +14,88 @@ export default function ContractPage() {
     cpf: '',
     telefone: '',
     email: '',
-    assinatura1: '',
-    assinatura2: '',
-    data1: new Date().toISOString().split('T')[0],
-    data2: new Date().toISOString().split('T')[0],
   });
   
+  const [pdfUrl, setPdfUrl] = useState<string>('/Contrato_REISM_King_Cinema_Profissional_v2.pdf');
+  const [numPages, setNumPages] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [currentSignature, setCurrentSignature] = useState<'signature1' | 'signature2' | null>(null);
   const [signature1Data, setSignature1Data] = useState('');
   const [signature2Data, setSignature2Data] = useState('');
   const [contractUrl, setContractUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
+  const [showCanvas1, setShowCanvas1] = useState(false);
+  const [showCanvas2, setShowCanvas2] = useState(false);
   
   const canvasRef1 = useRef<HTMLCanvasElement>(null);
   const canvasRef2 = useRef<HTMLCanvasElement>(null);
-  const contractRef = useRef<HTMLDivElement>(null);
+  const pdfContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Configurar contexto do canvas
-    const setupCanvas = (canvas: HTMLCanvasElement | null) => {
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 2;
-      ctx.lineCap = 'round';
+    // Carregar PDF usando pdf.js
+    const loadPdf = async () => {
+      try {
+        const pdfjsLib = await import('pdfjs-dist');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+        
+        const loadingTask = pdfjsLib.getDocument(pdfUrl);
+        const pdf = await loadingTask.promise;
+        setNumPages(pdf.numPages);
+        
+        // Renderizar primeira página
+        renderPage(pdf, 1);
+      } catch (err) {
+        console.error('Erro ao carregar PDF:', err);
+        setError('Erro ao carregar o PDF do contrato.');
+      }
     };
 
-    setupCanvas(canvasRef1.current);
-    setupCanvas(canvasRef2.current);
-  }, []);
+    loadPdf();
+  }, [pdfUrl]);
+
+  const renderPage = async (pdf: any, pageNum: number) => {
+    try {
+      const page = await pdf.getPage(pageNum);
+      const scale = 1.5;
+      const viewport = page.getViewport({ scale });
+      
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+      
+      const renderContext = {
+        canvasContext: context,
+        viewport: viewport,
+      };
+      
+      await page.render(renderContext).promise;
+      
+      if (pdfContainerRef.current) {
+        pdfContainerRef.current.innerHTML = '';
+        pdfContainerRef.current.appendChild(canvas);
+      }
+    } catch (err) {
+      console.error('Erro ao renderizar página:', err);
+    }
+  };
+
+  const setupCanvas = (canvas: HTMLCanvasElement | null) => {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+  };
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>, signature: 'signature1' | 'signature2') => {
     setIsDrawing(true);
-    setCurrentSignature(signature);
     const canvas = signature === 'signature1' ? canvasRef1.current : canvasRef2.current;
     if (!canvas) return;
     
+    setupCanvas(canvas);
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
@@ -66,11 +105,9 @@ export default function ContractPage() {
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !currentSignature) return;
+    if (!isDrawing) return;
     
-    const canvas = currentSignature === 'signature1' ? canvasRef1.current : canvasRef2.current;
-    if (!canvas) return;
-    
+    const canvas = (e.target as HTMLCanvasElement);
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
@@ -79,21 +116,20 @@ export default function ContractPage() {
     ctx.stroke();
   };
 
-  const stopDrawing = () => {
-    if (!isDrawing || !currentSignature) return;
+  const stopDrawing = (signature: 'signature1' | 'signature2') => {
+    if (!isDrawing) return;
     
-    const canvas = currentSignature === 'signature1' ? canvasRef1.current : canvasRef2.current;
+    const canvas = signature === 'signature1' ? canvasRef1.current : canvasRef2.current;
     if (!canvas) return;
     
     const dataUrl = canvas.toDataURL();
-    if (currentSignature === 'signature1') {
+    if (signature === 'signature1') {
       setSignature1Data(dataUrl);
     } else {
       setSignature2Data(dataUrl);
     }
     
     setIsDrawing(false);
-    setCurrentSignature(null);
   };
 
   const clearSignature = (signature: 'signature1' | 'signature2') => {
@@ -113,7 +149,6 @@ export default function ContractPage() {
   };
 
   const generateContractUrl = () => {
-    // Gera um ID único para o contrato
     const contractId = Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
     const baseUrl = window.location.origin;
     return `${baseUrl}/contrato/${contractId}`;
@@ -134,82 +169,62 @@ export default function ContractPage() {
     setError('');
 
     try {
-      // Abre uma nova janela com o contrato em formato de impressão
-      const contractElement = contractRef.current;
-      if (!contractElement) {
-        throw new Error('Elemento do contrato não encontrado');
+      // Usar pdf-lib para modificar o PDF original
+      const { PDFDocument, rgb } = await import('pdf-lib');
+      const pdfBytes = await fetch(pdfUrl).then(res => res.arrayBuffer());
+      const pdfDoc = await PDFDocument.load(pdfBytes);
+      
+      // Converter assinaturas para imagens e adicionar ao PDF
+      const pngImage1 = await pdfDoc.embedPng(signature1Data);
+      const pngImage2 = await pdfDoc.embedPng(signature2Data);
+      
+      // Adicionar assinaturas nas posições apropriadas
+      const pages = pdfDoc.getPages();
+      
+      // Assinatura 1 (página de dados)
+      if (pages.length > 0) {
+        const firstPage = pages[0];
+        const { width, height } = firstPage.getSize();
+        firstPage.drawImage(pngImage1, {
+          x: width - 150,
+          y: 50,
+          width: 100,
+          height: 40,
+        });
       }
-
-      // Cria HTML para impressão
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        throw new Error('Não foi possível abrir janela de impressão');
+      
+      // Assinatura 2 (última página)
+      if (pages.length > 0) {
+        const lastPage = pages[pages.length - 1];
+        const { width, height } = lastPage.getSize();
+        lastPage.drawImage(pngImage2, {
+          x: width - 150,
+          y: 50,
+          width: 100,
+          height: 40,
+        });
       }
-
-      const printContent = contractElement.innerHTML;
-      const printStyles = `
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          .bg-white { background: white; }
-          .text-center { text-align: center; }
-          .font-bold { font-weight: bold; }
-          .text-gray-800 { color: #1f2937; }
-          .text-gray-600 { color: #4b5563; }
-          .text-gray-700 { color: #374151; }
-          .text-xl { font-size: 1.25rem; }
-          .text-lg { font-size: 1.125rem; }
-          .text-sm { font-size: 0.875rem; }
-          .text-xs { font-size: 0.75rem; }
-          .mb-2 { margin-bottom: 0.5rem; }
-          .mb-4 { margin-bottom: 1rem; }
-          .mb-6 { margin-bottom: 1.5rem; }
-          .mb-8 { margin-bottom: 2rem; }
-          .mt-2 { margin-top: 0.5rem; }
-          .mt-4 { margin-top: 1rem; }
-          .mt-8 { margin-top: 2rem; }
-          .mt-12 { margin-top: 3rem; }
-          .p-4 { padding: 1rem; }
-          .p-8 { padding: 2rem; }
-          .bg-gray-50 { background: #f9fafb; }
-          .bg-rose-50 { background: #fff1f2; }
-          .border { border: 1px solid #e5e7eb; }
-          .border-2 { border: 2px solid #e5e7eb; }
-          .border-gray-200 { border-color: #e5e7eb; }
-          .border-gray-300 { border-color: #d1d5db; }
-          .border-rose-200 { border-color: #fecdd3; }
-          .rounded-lg { border-radius: 0.5rem; }
-          .grid { display: grid; }
-          .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-          .gap-4 { gap: 1rem; }
-          .gap-8 { gap: 2rem; }
-          .pt-4 { padding-top: 1rem; }
-          .pt-8 { padding-top: 2rem; }
-          .prose { max-width: 65ch; }
-          .max-w-none { max-width: none; }
-          canvas { border: 2px solid #d1d5db; border-radius: 0.5rem; background: white; }
-        </style>
-      `;
-
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Contrato - ${contractData.nome}</title>
-          ${printStyles}
-        </head>
-        <body>
-          ${printContent}
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-
-      // Gera URL do contrato
-      const url = generateContractUrl();
-      setContractUrl(url);
+      
+      // Salvar PDF modificado
+      const pdfBytesModified = await pdfDoc.save();
+      const blob = new Blob([pdfBytesModified], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      
+      // Download do PDF
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `contrato_${contractData.nome.replace(/\s+/g, '_')}.pdf`;
+      link.click();
+      
+      // Gerar URL do contrato
+      const contractUrlGenerated = generateContractUrl();
+      setContractUrl(contractUrlGenerated);
+      
+      // Limpar URL temporária
+      setTimeout(() => URL.revokeObjectURL(url), 100);
 
     } catch (err) {
-      console.error('Erro ao gerar contrato:', err);
+      console.error('Erro ao gerar PDF:', err);
       setError('Erro ao gerar o contrato. Tente novamente.');
     } finally {
       setIsGenerating(false);
@@ -227,14 +242,27 @@ export default function ContractPage() {
     window.open(whatsappUrl, '_blank');
   };
 
+  const goBack = () => {
+    window.location.hash = '';
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <FileText className="w-6 h-6" />
-            Assinatura de Contrato
-          </h1>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              <FileText className="w-6 h-6" />
+              Assinatura de Contrato
+            </h1>
+            <button
+              onClick={goBack}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Voltar
+            </button>
+          </div>
           
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <div>
@@ -280,158 +308,120 @@ export default function ContractPage() {
           </div>
         </div>
 
-        {/* Contrato para visualização e download */}
-        <div ref={contractRef} className="bg-white rounded-lg shadow-lg p-8 mb-6" style={{ minHeight: '800px' }}>
-          <div className="text-center mb-8">
-            <h2 className="text-xl font-bold text-gray-800">CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE AGENCIAMENTO DE MODELO DIGITAL</h2>
-          </div>
-
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-bold text-gray-800 mb-2">CONTRATANTE / AGÊNCIA</h3>
-            <p className="text-gray-600">REIS PRODUÇÕES CINEMATOGRÁFICAS</p>
-            <p className="text-gray-600">CNPJ: 69.209.066/0001-92</p>
-            <p className="text-gray-600">www.querofazerlive.com</p>
-          </div>
-
-          <div className="mb-6 p-4 bg-rose-50 rounded-lg border border-rose-200">
-            <h3 className="font-bold text-gray-800 mb-2">MODELO</h3>
-            <p className="text-gray-600"><strong>Nome:</strong> {contractData.nome || '________________________'}</p>
-            <p className="text-gray-600"><strong>CPF:</strong> {contractData.cpf || '________________________'}</p>
-            <p className="text-gray-600"><strong>Telefone:</strong> {contractData.telefone || '________________________'}</p>
-            <p className="text-gray-600"><strong>E-mail:</strong> {contractData.email || '________________________'}</p>
-          </div>
-
-          <div className="prose max-w-none text-gray-700 mb-8">
-            <h3 className="font-bold text-lg mb-2">1. DO OBJETO</h3>
-            <p className="mb-4">
-              O presente contrato tem por objeto a prestação de serviços de agenciamento, divulgação, orientação e suporte operacional 
-              à CONTRATADA, para realização de atividades digitais, incluindo transmissões ao vivo (lives), videochamadas e divulgação 
-              de perfil em plataformas destinadas ao público em geral.
-            </p>
-
-            <h3 className="font-bold text-lg mb-2">2. DAS OBRIGAÇÕES DA CONTRATANTE</h3>
-            <p className="mb-4">
-              A CONTRATANTE compromete-se a: (a) cadastrar a CONTRATADA nas plataformas digitais parceiras; (b) fornecer orientação 
-              técnica e suporte para realização das atividades; (c) divulgar o perfil da CONTRATADA em seus canais de comunicação; 
-              (d) remunerar a CONTRATADA conforme os termos estabelecidos nas plataformas.
-            </p>
-
-            <h3 className="font-bold text-lg mb-2">3. DAS OBRIGAÇÕES DA CONTRATADA</h3>
-            <p className="mb-4">
-              A CONTRATADA compromete-se a: (a) realizar as atividades digitais com profissionalismo e dedicação; (b) cumprir 
-              as normas e regulamentos das plataformas; (c) manter seus dados atualizados; (d) respeitar os direitos de imagem 
-              e privacidade.
-            </p>
-
-            <h3 className="font-bold text-lg mb-2">4. DA REMUNERAÇÃO</h3>
-            <p className="mb-4">
-              A remuneração da CONTRATADA será estabelecida conforme as políticas de cada plataforma digital, sendo paga 
-              diretamente pela plataforma ou conforme acordado entre as partes.
-            </p>
-
-            <h3 className="font-bold text-lg mb-2">5. DO PRAZO</h3>
-            <p className="mb-4">
-              O presente contrato tem prazo indeterminado, podendo ser rescindido por qualquer das partes mediante aviso prévio 
-              de 30 (trinta) dias.
-            </p>
-
-            <h3 className="font-bold text-lg mb-2">6. DA CONFIDENCIALIDADE</h3>
-            <p className="mb-4">
-              As partes comprometem-se a manter em sigilo todas as informações confidenciais obtidas durante a vigência deste 
-              contrato, não as divulgando a terceiros sem prévia autorização.
-            </p>
-
-            <h3 className="font-bold text-lg mb-2">7. DISPOSIÇÕES GERAIS</h3>
-            <p className="mb-4">
-              O presente contrato constitui o acordo integral entre as partes, prevalecendo sobre quaisquer entendimentos 
-              anteriores. Quaisquer alterações deverão ser feitas por escrito e assinadas por ambas as partes.
-            </p>
-          </div>
-
-          {/* Assinaturas */}
-          <div className="grid md:grid-cols-2 gap-8 mt-12">
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-bold text-gray-800 mb-2">ASSINATURA DA CONTRATANTE</h4>
-              <div className="border-2 border-gray-300 rounded-lg bg-white h-24 mb-2 flex items-center justify-center">
-                <p className="text-gray-400 text-sm">Assinatura REIS PRODUÇÕES</p>
-              </div>
-              <p className="text-sm text-gray-600">Data: {new Date().toLocaleDateString('pt-BR')}</p>
-            </div>
-
-            <div className="p-4 bg-rose-50 rounded-lg border border-rose-200">
-              <h4 className="font-bold text-gray-800 mb-2">ASSINATURA DA MODELO</h4>
-              <canvas
-                ref={canvasRef1}
-                width={300}
-                height={96}
-                className="border-2 border-gray-300 rounded-lg bg-white cursor-crosshair"
-                onMouseDown={(e) => startDrawing(e, 'signature1')}
-                onMouseMove={draw}
-                onMouseUp={stopDrawing}
-                onMouseLeave={stopDrawing}
-              />
-              <div className="flex gap-2 mt-2">
-                <button
-                  onClick={() => clearSignature('signature1')}
-                  className="text-xs text-rose-600 hover:text-rose-800"
-                >
-                  Limpar
-                </button>
-                {signature1Data && (
-                  <span className="text-xs text-green-600 flex items-center gap-1">
-                    <Check className="w-3 h-3" /> Assinado
-                  </span>
-                )}
-              </div>
-              <p className="text-sm text-gray-600 mt-2">Data: {new Date().toLocaleDateString('pt-BR')}</p>
+        {/* Visualizador de PDF */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-800">Contrato</h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+              >
+                Anterior
+              </button>
+              <span className="text-sm text-gray-600">
+                Página {currentPage} de {numPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(Math.min(numPages, currentPage + 1))}
+                disabled={currentPage === numPages}
+                className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+              >
+                Próxima
+              </button>
             </div>
           </div>
+          
+          <div 
+            ref={pdfContainerRef}
+            className="flex justify-center border border-gray-200 rounded-lg p-4 bg-gray-50"
+            style={{ minHeight: '600px' }}
+          />
+        </div>
 
-          {/* Segunda assinatura (final do contrato) */}
-          <div className="mt-12 pt-8 border-t-2 border-gray-200">
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <h4 className="font-bold text-gray-800 mb-2">ASSINATURA FINAL - CONTRATANTE</h4>
-                <div className="border-2 border-gray-300 rounded-lg bg-white h-24 mb-2 flex items-center justify-center">
-                  <p className="text-gray-400 text-sm">Assinatura REIS PRODUÇÕES</p>
+        {/* Áreas de assinatura */}
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <PenTool className="w-5 h-5" />
+              Assinatura - Página de Dados
+            </h3>
+            <button
+              onClick={() => setShowCanvas1(!showCanvas1)}
+              className="w-full mb-4 px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
+            >
+              {showCanvas1 ? 'Ocultar área de assinatura' : 'Mostrar área de assinatura'}
+            </button>
+            
+            {showCanvas1 && (
+              <>
+                <canvas
+                  ref={canvasRef1}
+                  width={400}
+                  height={150}
+                  className="border-2 border-gray-300 rounded-lg bg-white cursor-crosshair w-full"
+                  onMouseDown={(e) => startDrawing(e, 'signature1')}
+                  onMouseMove={draw}
+                  onMouseUp={() => stopDrawing('signature1')}
+                  onMouseLeave={() => stopDrawing('signature1')}
+                />
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => clearSignature('signature1')}
+                    className="text-sm text-rose-600 hover:text-rose-800"
+                  >
+                    Limpar
+                  </button>
+                  {signature1Data && (
+                    <span className="text-sm text-green-600 flex items-center gap-1">
+                      <Check className="w-4 h-4" /> Assinado
+                    </span>
+                  )}
                 </div>
-                <p className="text-sm text-gray-600">Data: {new Date().toLocaleDateString('pt-BR')}</p>
-              </div>
+              </>
+            )}
+          </div>
 
-              <div className="p-4 bg-rose-50 rounded-lg border border-rose-200">
-                <h4 className="font-bold text-gray-800 mb-2">ASSINATURA FINAL - MODELO</h4>
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <PenTool className="w-5 h-5" />
+              Assinatura - Final do Contrato
+            </h3>
+            <button
+              onClick={() => setShowCanvas2(!showCanvas2)}
+              className="w-full mb-4 px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
+            >
+              {showCanvas2 ? 'Ocultar área de assinatura' : 'Mostrar área de assinatura'}
+            </button>
+            
+            {showCanvas2 && (
+              <>
                 <canvas
                   ref={canvasRef2}
-                  width={300}
-                  height={96}
-                  className="border-2 border-gray-300 rounded-lg bg-white cursor-crosshair"
+                  width={400}
+                  height={150}
+                  className="border-2 border-gray-300 rounded-lg bg-white cursor-crosshair w-full"
                   onMouseDown={(e) => startDrawing(e, 'signature2')}
                   onMouseMove={draw}
-                  onMouseUp={stopDrawing}
-                  onMouseLeave={stopDrawing}
+                  onMouseUp={() => stopDrawing('signature2')}
+                  onMouseLeave={() => stopDrawing('signature2')}
                 />
                 <div className="flex gap-2 mt-2">
                   <button
                     onClick={() => clearSignature('signature2')}
-                    className="text-xs text-rose-600 hover:text-rose-800"
+                    className="text-sm text-rose-600 hover:text-rose-800"
                   >
                     Limpar
                   </button>
                   {signature2Data && (
-                    <span className="text-xs text-green-600 flex items-center gap-1">
-                      <Check className="w-3 h-3" /> Assinado
+                    <span className="text-sm text-green-600 flex items-center gap-1">
+                      <Check className="w-4 h-4" /> Assinado
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-gray-600 mt-2">Data: {new Date().toLocaleDateString('pt-BR')}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center mt-8 pt-4 border-t border-gray-200">
-            <p className="text-xs text-gray-500">
-              KING CINEMA PRODUCTIONS • REISM ESCRITÓRIO E AGÊNCIA DE MODELOS • www.querofazerlive.com
-            </p>
+              </>
+            )}
           </div>
         </div>
 
@@ -450,7 +440,7 @@ export default function ContractPage() {
             ) : (
               <>
                 <Download className="w-5 h-5" />
-                Baixar Contrato
+                Baixar Contrato Assinado
               </>
             )}
           </button>
