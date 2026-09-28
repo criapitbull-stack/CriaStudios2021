@@ -27,6 +27,7 @@ export default function ContractPage() {
   const [error, setError] = useState('');
   const [showCanvas1, setShowCanvas1] = useState(false);
   const [showCanvas2, setShowCanvas2] = useState(false);
+  const [useIframe, setUseIframe] = useState(false);
   
   const canvasRef1 = useRef<HTMLCanvasElement>(null);
   const canvasRef2 = useRef<HTMLCanvasElement>(null);
@@ -37,17 +38,19 @@ export default function ContractPage() {
     const loadPdf = async () => {
       try {
         const pdfjsLib = await import('pdfjs-dist');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js`;
         
+        console.log('Tentando carregar PDF:', pdfUrl);
         const loadingTask = pdfjsLib.getDocument(pdfUrl);
         const pdf = await loadingTask.promise;
+        console.log('PDF carregado com sucesso, páginas:', pdf.numPages);
         setNumPages(pdf.numPages);
         
         // Renderizar primeira página
         renderPage(pdf, 1);
       } catch (err) {
         console.error('Erro ao carregar PDF:', err);
-        setError('Erro ao carregar o PDF do contrato.');
+        setError('Erro ao carregar o PDF do contrato. Verifique se o arquivo existe.');
       }
     };
 
@@ -333,11 +336,33 @@ export default function ContractPage() {
             </div>
           </div>
           
-          <div 
-            ref={pdfContainerRef}
-            className="flex justify-center border border-gray-200 rounded-lg p-4 bg-gray-50"
-            style={{ minHeight: '600px' }}
-          />
+          <div className="flex justify-center border border-gray-200 rounded-lg p-4 bg-gray-50" style={{ minHeight: '600px' }}>
+            {useIframe ? (
+              <iframe
+                src={pdfUrl}
+                className="w-full h-full"
+                style={{ minHeight: '600px', border: 'none' }}
+                title="Contrato PDF"
+              />
+            ) : (
+              <div 
+                ref={pdfContainerRef}
+                className="w-full h-full"
+                style={{ minHeight: '600px' }}
+              />
+            )}
+          </div>
+          
+          {error && (
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={() => setUseIframe(true)}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Tentar visualizador nativo
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Áreas de assinatura */}
