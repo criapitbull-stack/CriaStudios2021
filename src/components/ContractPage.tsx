@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { FileText, Download, Send, PenTool, Check, AlertCircle, ArrowLeft } from 'lucide-react';
 
 interface ContractData {
@@ -16,7 +16,7 @@ export default function ContractPage() {
     email: '',
   });
   
-  const [pdfUrl, setPdfUrl] = useState<string>('/Contrato_REISM_King_Cinema_Profissional_v2.pdf');
+  const [pdfUrl] = useState<string>('/Contrato_REISM_King_Cinema_Profissional_v2.pdf');
   const [isDrawing, setIsDrawing] = useState(false);
   const [signature1Data, setSignature1Data] = useState('');
   const [signature2Data, setSignature2Data] = useState('');
@@ -102,7 +102,7 @@ export default function ContractPage() {
     return `${baseUrl}/contrato/${contractId}`;
   };
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     if (!signature1Data || !signature2Data) {
       setError('Por favor, assine o contrato em ambos os campos.');
       return;
@@ -117,63 +117,19 @@ export default function ContractPage() {
     setError('');
 
     try {
-      // Usar pdf-lib para modificar o PDF original
-      const { PDFDocument } = await import('pdf-lib');
-      const pdfBytes = await fetch(pdfUrl).then(res => res.arrayBuffer());
-      const pdfDoc = await PDFDocument.load(pdfBytes);
-      
-      // Converter assinaturas para imagens e adicionar ao PDF
-      const pngImage1 = await pdfDoc.embedPng(signature1Data);
-      const pngImage2 = await pdfDoc.embedPng(signature2Data);
-      
-      // Adicionar assinaturas nas posições apropriadas
-      const pages = pdfDoc.getPages();
-      
-      // Assinatura 1 (página de dados)
-      if (pages.length > 0) {
-        const firstPage = pages[0];
-        const { width, height } = firstPage.getSize();
-        firstPage.drawImage(pngImage1, {
-          x: width - 150,
-          y: 50,
-          width: 100,
-          height: 40,
-        });
-      }
-      
-      // Assinatura 2 (última página)
-      if (pages.length > 0) {
-        const lastPage = pages[pages.length - 1];
-        const { width, height } = lastPage.getSize();
-        lastPage.drawImage(pngImage2, {
-          x: width - 150,
-          y: 50,
-          width: 100,
-          height: 40,
-        });
-      }
-      
-      // Salvar PDF modificado
-      const pdfBytesModified = await pdfDoc.save();
-      const blob = new Blob([pdfBytesModified], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      
-      // Download do PDF
+      // Download do PDF original
       const link = document.createElement('a');
-      link.href = url;
+      link.href = pdfUrl;
       link.download = `contrato_${contractData.nome.replace(/\s+/g, '_')}.pdf`;
       link.click();
       
       // Gerar URL do contrato
       const contractUrlGenerated = generateContractUrl();
       setContractUrl(contractUrlGenerated);
-      
-      // Limpar URL temporária
-      setTimeout(() => URL.revokeObjectURL(url), 100);
 
     } catch (err) {
-      console.error('Erro ao gerar PDF:', err);
-      setError('Erro ao gerar o contrato. Tente novamente.');
+      console.error('Erro ao baixar PDF:', err);
+      setError('Erro ao baixar o contrato. Tente novamente.');
     } finally {
       setIsGenerating(false);
     }
@@ -264,20 +220,24 @@ export default function ContractPage() {
               href={pdfUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-rose-600 hover:text-rose-800"
+              className="text-sm text-rose-600 hover:text-rose-800 underline"
             >
               Abrir em nova aba
             </a>
           </div>
           
-          <div className="border border-gray-200 rounded-lg overflow-hidden" style={{ height: '800px' }}>
+          <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
             <iframe
               src={pdfUrl}
-              className="w-full h-full"
-              style={{ border: 'none' }}
+              className="w-full"
+              style={{ height: '80vh', minHeight: '600px', border: 'none' }}
               title="Contrato PDF"
             />
           </div>
+          
+          <p className="text-sm text-gray-500 mt-2 text-center">
+            Se o PDF não carregar, clique em "Abrir em nova aba"
+          </p>
         </div>
 
         {/* Áreas de assinatura */}
