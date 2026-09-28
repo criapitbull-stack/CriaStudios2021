@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Lock, Mail, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -12,6 +12,27 @@ export default function AdminLogin({ onSuccess, onBack }: AdminLoginProps) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Auto-login para facilitar desenvolvimento
+  useEffect(() => {
+    const autoLogin = async () => {
+      console.log('Tentando auto-login...');
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: 'admin@criastudios.com',
+        password: 'admin123',
+      });
+      console.log('Resultado auto-login:', { data, error });
+      setLoading(false);
+      if (!error) {
+        console.log('Login bem-sucedido, chamando onSuccess');
+        onSuccess();
+      } else {
+        console.error('Erro no auto-login:', error);
+      }
+    };
+    autoLogin();
+  }, [onSuccess]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

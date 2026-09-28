@@ -13,6 +13,7 @@ import Footer from '@/components/Footer';
 import ChatButton from '@/components/ChatButton';
 import AdminLogin from '@/components/admin/AdminLogin';
 import AdminDashboard from '@/components/admin/AdminDashboard';
+import ContractPage from '@/components/ContractPage';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
   }, []);
 
   const isAdminRoute = route.startsWith('#admin');
+  const isContractRoute = route.startsWith('#contrato');
 
   if (loading) {
     return (
@@ -50,6 +52,10 @@ function App() {
         }}
       />
     );
+  }
+
+  if (isContractRoute) {
+    return <ContractPage />;
   }
 
   return (
